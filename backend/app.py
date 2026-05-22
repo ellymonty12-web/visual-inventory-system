@@ -1,6 +1,10 @@
 # VIMS Backend - Flask Application
 
-#Flask creates backend app
+# Import the function created in database.py to initialize the database
+# NOTE: Python must import init_db() so it can be called before the server starts
+from database import init_db
+
+# Flask creates the backend application
 # request lets you inspect incoming HTTP requests
 # jsonify converts Python data to JSON format for API responses
 # os interacts with the file system (folders, paths) 
@@ -42,7 +46,7 @@ def upload_image():
     if "image" not in request.files:
         return jsonify({"error": "No image uploaded"}), 400
     
-    # request.files contains uploaded files sent via form-data
+    # request.files contains uploaded files sent via form-data in the HTTP request
     # Extract the file object using the "image" key
     file = request.files["image"]
 
@@ -59,6 +63,12 @@ def upload_image():
 
 # Run server only if script is executed directly (not imported elsewhere)
 if __name__ == "__main__":
+    # NOTE: It is important to initialize system resources (like databases)
+    # BEFORE starting the server, so the application is ready to handle requests
+
+    # Connect to SQLite, create inventory.db file if it doesn't exist, and create shirts table if it doesn't exist
+    init_db()
+
     # Starts the Flask development server with debug mode on and listens on port 3000
     # debug=True reloads on code changes and shows detailed error messages
     app.run(debug=True, port=3000)
