@@ -29,6 +29,53 @@ UPLOAD_FOLDER = os.path.join(BASE_DIR, "..", "images")
 # exist_ok=True means no error if folder already exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+# --- Add Inventory Item Route ---
+# Creates endpoint POST /add-item to insert new record into the database
+@app.route("/add-item", methods=["POST"]) # Route definition: listens for POST requests at /add-item
+def add_item():
+    # Get request data sent by the client in JSON format
+    data = request.json
+
+    # Validate input
+    # Ensures request data exists and required "filename" field is provided
+    if not data or "filename" not in data:
+        return jsonify({"error": "Missing filename"}), 400
+    
+    # Extract values
+    # If size fields are missing, default to 0 using data.get(key, default)
+    filename = data.get("filename")
+    size_s = data.get("size_s", 0)
+    size_m = data.get("size_m", 0)
+    size_l = data.get("size_l", 0)
+    size_xl = data.get("size_xl", 0)
+    size_xxl = data.get("size_xxl", 0)
+
+    # Database import
+    # Import locally to keep database dependencies scoped to this function
+    import sqlite3
+    # DB_PATH is reused from database.py to maintain a single source of truth
+    from database import DB_PATH
+
+    # Connect to the database
+    # Opens database session
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    # Insert SQL data
+    # Uses parameterized queries (?) to prevent SQL injection and ensure safe data insertion
+    cursor.execute("""
+        INSERT INTO shirts (filename, size_s, size_m, size_l, size_xl, size_xxl)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (filename, size_s, size_m, size_l, size_xl, size_xxl))
+
+    # Save and close database connection
+    # Writes data permanently to the database file and frees up resources
+    conn.commit()
+    conn.close()
+
+    # Response confirms success to client with a JSON message
+    return jsonify({"message": "Item added successfully"})
+
 # --- Root Route ---
 # Creates endpoint GET / when localhost:3000 is visited
 @app.route("/")
