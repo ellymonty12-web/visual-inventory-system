@@ -76,6 +76,41 @@ def add_item():
     # Response confirms success to client with a JSON message
     return jsonify({"message": "Item added successfully"})
 
+# --- Get Inventory Route ---
+# Creates endpoint GET /items to retrieve all inventory records
+@app.route("/items", methods=["GET"]) # Route definition: listens for GET requests at /items
+def get_items():
+    import sqlite3
+    from database import DB_PATH
+
+    # Connect to the database
+    conn = sqlite3.connect(DB_PATH) # Opens database session
+    cursor = conn.cursor()
+
+    # Execute SQL query to select all rows
+    cursor.execute("SELECT * FROM shirts") # Returns all rows from the shirts table
+    rows = cursor.fetchall() # Fetches all results as a list of tuples (not yet in JSON format)
+
+    conn.close() # Close database connection
+
+    # Convert database rows into JSON format
+    # NOTE: Flask cannot directly send SQL tuples, must convert to list of dictionaries first
+    items = []
+    for row in rows:
+        items.append({
+            "id": row[0],
+            "filename": row[1],
+            "size_s": row[2],
+            "size_m": row[3],
+            "size_l": row[4],
+            "size_xl": row[5],
+            "size_xxl": row[6]
+        })
+
+    # Return JSON response containing the list of inventory items
+    # Sends JSON list to client
+    return jsonify(items)
+
 # --- Root Route ---
 # Creates endpoint GET / when localhost:3000 is visited
 @app.route("/")
