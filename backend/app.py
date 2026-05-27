@@ -1,15 +1,22 @@
 # VIMS Backend - Flask Application
 
-# Import the function created in database.py to initialize the database
+# Import database initialization function and DB path
 # NOTE: Python must import init_db() so it can be called before the server starts
-from database import init_db
+from database import init_db, DB_PATH
 
 # Flask creates the backend application
 # request lets you inspect incoming HTTP requests
 # jsonify converts Python data to JSON format for API responses
-# os interacts with the file system (folders, paths) 
 from flask import Flask, request, jsonify
+
+# os handles file paths and directories, used for saving uploaded images and defining upload folder
 import os
+
+# sqlite3 handles database operations, used to connect to the SQLite database and execute SQL queries
+import sqlite3
+
+# secure_filename prevents unsafe file paths
+from werkzeug.utils import secure_filename 
 
 # Create Flask app instance
 #__name__ tells Flask where app lives
@@ -31,6 +38,8 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # --- Add Inventory Item Route ---
 # Creates endpoint POST /add-item to insert new record into the database
+# NOTE: This endpoint allows manual insertion.
+# Upload endpoint already performs automatic insertion.
 @app.route("/add-item", methods=["POST"]) # Route definition: listens for POST requests at /add-item
 def add_item():
     # Get request data sent by the client in JSON format
@@ -49,12 +58,6 @@ def add_item():
     size_l = data.get("size_l", 0)
     size_xl = data.get("size_xl", 0)
     size_xxl = data.get("size_xxl", 0)
-
-    # Database import
-    # Import locally to keep database dependencies scoped to this function
-    import sqlite3
-    # DB_PATH is reused from database.py to maintain a single source of truth
-    from database import DB_PATH
 
     # Connect to the database
     # Opens database session
@@ -80,8 +83,6 @@ def add_item():
 # Creates endpoint GET /items to retrieve all inventory records
 @app.route("/items", methods=["GET"]) # Route definition: listens for GET requests at /items
 def get_items():
-    import sqlite3
-    from database import DB_PATH
 
     # Connect to the database
     conn = sqlite3.connect(DB_PATH) # Opens database session
@@ -125,23 +126,55 @@ def home():
 def upload_image():
     # Check if file exists. Looks for "image" key in uploaded files.
     # If missing, return JSON error message with 400 Bad Request status code
-    if "image" not in request.files:
+    if "image" not in request.files or request.files["image"].filename == "":
         return jsonify({"error": "No image uploaded"}), 400
     
     # request.files contains uploaded files sent via form-data in the HTTP request
     # Extract the file object using the "image" key
     file = request.files["image"]
 
+    # --- Secure the filename ---
+    # Prevents malicious or invalid file paths
+    filename = secure_filename(file.filename)
+
     # --- Save file ---
     # Create full path to save the file: UPLOAD_FOLDER + original filename
-    # NOTE: filename should be sanitized in production using secure_filename
-    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+    # filename is sanitized using secure_filename to prevent unsafe file paths
+    file_path = os.path.join(UPLOAD_FOLDER, filename)
 
     # Write the file to disk at the specified path.
     file.save(file_path)
 
+    # --- Extract inventory data ---
+    # request.form returns strings, so convert values to integers using int()
+    # default value of 0 is applied if field is missing
+    try:
+        size_s = int(request.form.get("size_s", 0))
+        size_m = int(request.form.get("size_m", 0))
+        size_l = int(request.form.get("size_l", 0))
+        size_xl = int(request.form.get("size_xl", 0))
+        size_xxl = int(request.form.get("size_xxl", 0))
+    except ValueError:
+        # If any size field is not a valid integer, return an error
+        return jsonify({"error": "Invalid size values"}), 400
+    
+    # --- Insert into database ---
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO shirts (filename, size_s, size_m, size_l, size_xl, size_xxl)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (filename, size_s, size_m, size_l, size_xl, size_xxl))
+
+    conn.commit()
+    conn.close()
+
     # Return JSON response confirming upload with the original filename
-    return jsonify({"message": "Image uploaded successfully", "filename": file.filename})
+    return jsonify({
+        "message": "Image uploaded and item added successfully",
+        "filename": filename
+    })
 
 # Run server only if script is executed directly (not imported elsewhere)
 if __name__ == "__main__":
