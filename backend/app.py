@@ -36,20 +36,24 @@ UPLOAD_FOLDER = os.path.join(BASE_DIR, "..", "images")
 # exist_ok=True means no error if folder already exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# --- Add Inventory Item Route ---
-# Creates endpoint POST /add-item to insert new record into the database
+
+# --- Add Inventory Item Route (Deprecated) ---
+# NOTE: This endpoint is deprecated.
+# Use /upload instead, which now handles both file upload and database insertion.
 # NOTE: This endpoint allows manual insertion.
-# Upload endpoint already performs automatic insertion.
 @app.route("/add-item", methods=["POST"]) # Route definition: listens for POST requests at /add-item
 def add_item():
     # Get request data sent by the client in JSON format
-    data = request.json
+    data = request.get_json(silent=True) # silent=True prevents exceptions if JSON is invalid, returns None instead
 
     # Validate input
     # Ensures request data exists and required "filename" field is provided
     if not data or "filename" not in data:
-        return jsonify({"error": "Missing filename"}), 400
-    
+        return jsonify({
+            "status": "error",
+            "message": "Missing filename"
+        }), 400
+
     # Extract values
     # If size fields are missing, default to 0 using data.get(key, default)
     filename = data.get("filename")
@@ -77,7 +81,10 @@ def add_item():
     conn.close()
 
     # Response confirms success to client with a JSON message
-    return jsonify({"message": "Item added successfully"})
+    return jsonify({
+        "status": "success",
+        "message": "Item added successfully (deprecated endpoint - use /upload instead)",
+    })
 
 # --- Get Inventory Route ---
 # Creates endpoint GET /items to retrieve all inventory records
@@ -110,7 +117,10 @@ def get_items():
 
     # Return JSON response containing the list of inventory items
     # Sends JSON list to client
-    return jsonify(items)
+    return jsonify({
+        "status": "success",
+        "data": items
+    })
 
 # --- Root Route ---
 # Creates endpoint GET / when localhost:3000 is visited
@@ -127,7 +137,10 @@ def upload_image():
     # Check if file exists. Looks for "image" key in uploaded files.
     # If missing, return JSON error message with 400 Bad Request status code
     if "image" not in request.files or request.files["image"].filename == "":
-        return jsonify({"error": "No image uploaded"}), 400
+        return jsonify({
+            "status": "error",
+            "message": "No image uploaded"
+        }), 400
     
     # request.files contains uploaded files sent via form-data in the HTTP request
     # Extract the file object using the "image" key
@@ -156,8 +169,11 @@ def upload_image():
         size_xxl = int(request.form.get("size_xxl", 0))
     except ValueError:
         # If any size field is not a valid integer, return an error
-        return jsonify({"error": "Invalid size values"}), 400
-    
+        return jsonify({
+            "status": "error",
+            "message": "Invalid size values"
+        }), 400
+
     # --- Insert into database ---
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -172,8 +188,11 @@ def upload_image():
 
     # Return JSON response confirming upload with the original filename
     return jsonify({
+        "status": "success",
         "message": "Image uploaded and item added successfully",
+        "data": {
         "filename": filename
+        }
     })
 
 # Run server only if script is executed directly (not imported elsewhere)
