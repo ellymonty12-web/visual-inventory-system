@@ -2,6 +2,7 @@
 
 # Import database initialization function and DB path
 # NOTE: Python must import init_db() so it can be called before the server starts
+# NOTE: In larger applications, database connections are typically managed centrally
 from database import init_db, DB_PATH
 
 # Flask creates the backend application
@@ -39,8 +40,8 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # --- Add Inventory Item Route (Deprecated) ---
 # NOTE: This endpoint is deprecated.
-# Use /upload instead, which now handles both file upload and database insertion.
-# NOTE: This endpoint allows manual insertion.
+# It remains available for testing/manual insertion.
+# Use /upload for normal application workflow.
 @app.route("/add-item", methods=["POST"]) # Route definition: listens for POST requests at /add-item
 def add_item():
     # Get request data sent by the client in JSON format
@@ -48,7 +49,7 @@ def add_item():
 
     # Validate input
     # Ensures request data exists and required "filename" field is provided
-    if not data or "filename" not in data:
+    if not data or not data.get("filename"):
         return jsonify({
             "status": "error",
             "message": "Missing filename"
@@ -56,7 +57,7 @@ def add_item():
 
     # Extract values
     # If size fields are missing, default to 0 using data.get(key, default)
-    filename = data.get("filename")
+    filename = data.get("filename") # Required field, no default value
     size_s = data.get("size_s", 0)
     size_m = data.get("size_m", 0)
     size_l = data.get("size_l", 0)
@@ -75,6 +76,8 @@ def add_item():
         VALUES (?, ?, ?, ?, ?, ?)
     """, (filename, size_s, size_m, size_l, size_xl, size_xxl))
 
+    item_id = cursor.lastrowid # Retrieves the ID of the newly inserted record
+
     # Save and close database connection
     # Writes data permanently to the database file and frees up resources
     conn.commit()
@@ -84,6 +87,10 @@ def add_item():
     return jsonify({
         "status": "success",
         "message": "Item added successfully (deprecated endpoint - use /upload instead)",
+        "data": {
+            "id": item_id,
+            "filename": filename
+        }
     })
 
 # --- Get Inventory Route ---
@@ -119,6 +126,7 @@ def get_items():
     # Sends JSON list to client
     return jsonify({
         "status": "success",
+        "count": len(items),
         "data": items
     })
 
@@ -183,6 +191,9 @@ def upload_image():
         VALUES (?, ?, ?, ?, ?, ?)
     """, (filename, size_s, size_m, size_l, size_xl, size_xxl))
 
+    # Get inserted row ID
+    item_id = cursor.lastrowid # Retrieves the ID of the newly inserted record
+
     conn.commit()
     conn.close()
 
@@ -191,7 +202,13 @@ def upload_image():
         "status": "success",
         "message": "Image uploaded and item added successfully",
         "data": {
-        "filename": filename
+            "id": item_id,
+            "filename": filename,
+            "size_s": size_s,
+            "size_m": size_m,
+            "size_l": size_l,
+            "size_xl": size_xl,
+            "size_xxl": size_xxl
         }
     })
 
