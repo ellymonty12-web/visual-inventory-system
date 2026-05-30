@@ -1,14 +1,22 @@
 # VIMS Backend - Flask Application
 
-# Import database initialization function and DB path
-# NOTE: Python must import init_db() so it can be called before the server starts
-# NOTE: In larger applications, database connections are typically managed centrally
-from database import init_db, DB_PATH
-
 # Flask creates the backend application
 # request lets you inspect incoming HTTP requests
 # jsonify converts Python data to JSON format for API responses
 from flask import Flask, request, jsonify
+
+from flask_cors import CORS # Allows cross-origin requests from frontend (e.g., localhost:8000) to backend (localhost:3000)
+
+# Create Flask app instance
+app = Flask(__name__)
+
+# Enable CORS
+CORS(app) # Enable CORS for the Flask app, allowing requests from any origin (for development purposes)
+
+# Import database initialization function and DB path
+# NOTE: Python must import init_db() so it can be called before the server starts
+# NOTE: In larger applications, database connections are typically managed centrally
+from database import init_db, DB_PATH
 
 # os handles file paths and directories, used for saving uploaded images and defining upload folder
 import os
@@ -18,11 +26,6 @@ import sqlite3
 
 # secure_filename prevents unsafe file paths
 from werkzeug.utils import secure_filename 
-
-# Create Flask app instance
-#__name__ tells Flask where app lives
-# Starts the backend server
-app = Flask(__name__)
 
 # --- Set upload folder ---
 # os.path.abspath(__file__): gets full path to app.py
