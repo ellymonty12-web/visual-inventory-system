@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VIMS Upload</title>
+</head>
+<body>
+
+    <h1>Upload Shirt</h1>
+    <form id="uploadForm">
+        <input type="file"  name="image" required><br><br>
+
+        <label>S:</label> <input type="number" name="size_s" min="0"><br>
+        <label>M:</label> <input type="number" name="size_m" min="0"><br>
+        <label>L:</label> <input type="number" name="size_l" min="0"><br>
+        <label>XL:</label> <input type="number" name="size_xl" min="0"><br>
+        <label>XXL:</label> <input type="number" name="size_xxl" min="0"><br><br>
+
+        <button type="submit">Upload</button>
+    </form>
+
+    <!-- Display response from backend -->
+    <pre id="response"></pre>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+
+        // Handle form submission
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            // Create FormData object from the form, which includes the file and size data
+            const formData = new FormData(form);
+
+            // Error handling for fetch request to backend
+            try {
+                const response = await fetch("http://localhost:3000/upload", {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error("Server error");
+                }
+
+                const data = await response.json();
+
+                form.reset();
+
+                document.getElementById("response").innerText =
+                    JSON.stringify(data, null, 2);
+
+            } catch (error) {
+                document.getElementById("response").innerText =
+                    "Error: " + error.message;
+            }
+        });
+    </script>
+</body>
+</html>
