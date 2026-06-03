@@ -152,11 +152,11 @@
 
                     // --- Other Cells ---
                     row.insertCell().innerText = item.filename;
-                    row.insertCell().innerText = item.size_s;
-                    row.insertCell().innerText = item.size_m;
-                    row.insertCell().innerText = item.size_l;
-                    row.insertCell().innerText = item.size_xl;
-                    row.insertCell().innerText = item.size_xxl;
+                    row.insertCell().innerText = item.size_s?? "-"; // Display "-" if size_s is null or undefined
+                    row.insertCell().innerText = item.size_m?? "-"; // Display "-" if size_m is null or undefined
+                    row.insertCell().innerText = item.size_l?? "-"; // Display "-" if size_l is null or undefined
+                    row.insertCell().innerText = item.size_xl?? "-"; // Display "-" if size_xl is null or undefined
+                    row.insertCell().innerText = item.size_xxl?? "-"; // Display "-" if size_xxl is null or undefined
 
                     // --- Delete Button ---
                     const actionCell = row.insertCell();

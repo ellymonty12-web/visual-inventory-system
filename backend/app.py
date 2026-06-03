@@ -173,12 +173,17 @@ def upload_image():
     # --- Extract inventory data ---
     # request.form returns strings, so convert values to integers using int()
     # default value of 0 is applied if field is missing
+    def parse_size(value):
+        if value == "" or value is None:
+            return None
+        return int(value)
+
     try:
-        size_s = int(request.form.get("size_s", 0))
-        size_m = int(request.form.get("size_m", 0))
-        size_l = int(request.form.get("size_l", 0))
-        size_xl = int(request.form.get("size_xl", 0))
-        size_xxl = int(request.form.get("size_xxl", 0))
+        size_s = parse_size(request.form.get("size_s"))
+        size_m = parse_size(request.form.get("size_m"))
+        size_l = parse_size(request.form.get("size_l"))
+        size_xl = parse_size(request.form.get("size_xl"))
+        size_xxl = parse_size(request.form.get("size_xxl"))
     except ValueError:
         # If any size field is not a valid integer, return an error
         return jsonify({
