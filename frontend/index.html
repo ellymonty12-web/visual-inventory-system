@@ -105,7 +105,7 @@
 
                 // Create header row
                 const header = table.insertRow();
-                ["ID", "Filename", "S", "M", "L", "XL", "XXL"].forEach(text => {
+                ["Image", "Filename", "S", "M", "L", "XL", "XXL"].forEach(text => {
                     const cell = header.insertCell();
                     cell.innerText = text;
                 });
@@ -114,8 +114,17 @@
                 data.data.forEach(item => {
                     const row = table.insertRow();
 
-                    // Insert cells for each item property and set their text content
-                    row.insertCell().innerText = item.id;
+                    // --- Image Cell ---
+                    const imgCell = row.insertCell();
+                    const img = document.createElement("img");
+
+                    img.src = `http://localhost:3000/images/${item.filename}`; // Set image source to the URL where the backend serves uploaded images
+                    img.width = 80; // adjust size as needed
+
+                    // Append the image element to the cell
+                    imgCell.appendChild(img);
+
+                    // --- Other Cells ---
                     row.insertCell().innerText = item.filename;
                     row.insertCell().innerText = item.size_s;
                     row.insertCell().innerText = item.size_m;
