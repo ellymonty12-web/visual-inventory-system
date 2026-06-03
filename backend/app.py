@@ -233,7 +233,19 @@ def delete_item(item_id):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
-    # Execute SQL query to delete the item with the specified ID
+    # Get filename before deleting
+    cursor.execute("SELECT filename FROM shirts WHERE id = ?", (item_id,))
+    result = cursor.fetchone() # Fetch the first result (should be only one row since ID is unique)
+
+    if result:
+        filename = result[0] # Extract filename from the result tuple
+
+        # Delete the image file from disk
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        if os.path.exists(file_path):
+            os.remove(file_path) # Remove the file from the filesystem
+
+    # Delete from database
     cursor.execute("DELETE FROM shirts WHERE id = ?", (item_id,))
     conn.commit() # Save changes to the database
     conn.close() # Close database connection
