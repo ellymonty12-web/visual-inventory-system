@@ -129,7 +129,7 @@
 
                 // Create header row
                 const header = table.createTHead().insertRow();
-                ["Image", "Filename", "S", "M", "L", "XL", "XXL"].forEach(text => {
+                ["Image", "Filename", "S", "M", "L", "XL", "XXL", "Actions"].forEach(text => {
                     const th = document.createElement("th");
                     th.innerText = text;
                     header.appendChild(th);
@@ -157,6 +157,31 @@
                     row.insertCell().innerText = item.size_l;
                     row.insertCell().innerText = item.size_xl;
                     row.insertCell().innerText = item.size_xxl;
+
+                    // --- Delete Button ---
+                    const actionCell = row.insertCell();
+                    const deleteBtn = document.createElement("button");
+
+                    deleteBtn.innerText = "Delete";
+                    deleteBtn.className = "btn btn-danger btn-sm"; // Add Bootstrap classes to the button for styling
+
+                    // Add click event listener to the delete button to send a DELETE request to the backend
+                    deleteBtn.onclick = async () => {
+                        try {
+                            await fetch(`http://localhost:3000/delete-item/${item.id}`, {
+                                method: "DELETE"
+                            });
+
+                            // Refresh table after deletion
+                            loadInventory();
+
+                        } catch (error) {
+                            alert("Failed to delete item");
+                        }
+                    };
+
+                    // Append the delete button to the action cell
+                    actionCell.appendChild(deleteBtn);
                 });
 
                 // Add table to page
