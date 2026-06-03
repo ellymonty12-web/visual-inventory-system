@@ -5,55 +5,105 @@
 </head>
 <body>
 
+    <!-- Form for uploading shirt image and size data -->
     <h1>Upload Shirt</h1>
     <form id="uploadForm">
+        <!-- File input for shirt image
+         NOTE: type="file" allows users to select a file from their device
+         NOTE: The 'name' attribute must match the expected field name in the backend -->
         <input type="file"  name="image" required><br><br>
 
+        <!-- Size inputs 
+         NOTE: type="number" creates a numeric input field
+         NOTE: The 'name' attribute must match the expected field name in the backend
+         NOTE: The 'min' attribute sets the minimum value for the input -->
         <label>S:</label> <input type="number" name="size_s" min="0"><br>
         <label>M:</label> <input type="number" name="size_m" min="0"><br>
         <label>L:</label> <input type="number" name="size_l" min="0"><br>
         <label>XL:</label> <input type="number" name="size_xl" min="0"><br>
         <label>XXL:</label> <input type="number" name="size_xxl" min="0"><br><br>
 
+        <!-- Submit button to upload the form data to the backend -->
         <button type="submit">Upload</button>
     </form>
+
+    <hr>
+
+    <h2>Inventory</h2>
+    <!-- Button to call the loadInventory function -->
+    <button onclick="loadInventory()">Load Inventory</button>
+    <!-- Preformatted text area to display the inventory data fetched from the backend -->
+    <pre id="inventory"></pre>
 
     <!-- Display response from backend -->
     <pre id="response"></pre>
 
+    <!-- JavaScript to handle form submission and fetch inventory data -->
     <script>
+        // Get the form element by its ID, stored in a variable
         const form = document.getElementById('uploadForm');
 
         // Handle form submission
         form.addEventListener("submit", async (e) => {
+            // Prevent the default form submission behavior, which would cause a page reload
             e.preventDefault();
 
             // Create FormData object from the form, which includes the file and size data
             const formData = new FormData(form);
 
-            // Error handling for fetch request to backend
             try {
+                // Send a POST request to the backend with the form data
                 const response = await fetch("http://localhost:3000/upload", {
                     method: 'POST',
                     body: formData
                 });
 
+                // Check if the response status indicates an error (not 2xx)
                 if (!response.ok) {
                     throw new Error("Server error");
                 }
 
+                // Parse the JSON response from the server
                 const data = await response.json();
 
+                // Reset the form after successful submission to clear the input fields
                 form.reset();
 
+                // Displays upload response from the backend
                 document.getElementById("response").innerText =
-                    JSON.stringify(data, null, 2);
+                    JSON.stringify(data, null, 2); // Pretty-print the JSON response with indentation for better readability
 
+            // Catch any errors that occur during the fetch request and display an error message
             } catch (error) {
                 document.getElementById("response").innerText =
                     "Error: " + error.message;
             }
         });
+
+        // Load Inventory function to fetch inventory data from the backend
+        async function loadInventory() {
+            try {
+                // Send a GET request to the backend to fetch inventory data
+                const response = await fetch("http://localhost:3000/items");
+
+                // Check if the response status indicates an error (not 2xx)
+                if (!response.ok) {
+                    throw new Error("Failed to fetch inventory");
+                }
+
+                // Parse the JSON response from the server
+                const data = await response.json();
+
+                // Display the fetched inventory data
+                document.getElementById("inventory").innerText =
+                    JSON.stringify(data, null, 2); // Pretty-print the JSON response with indentation for better readability
+
+            // Catch any errors that occur during the fetch request and display an error message
+            } catch (error) {
+                document.getElementById("inventory").innerText =
+                    "Error loading inventory";
+            }
+        }
     </script>
 </body>
 </html>
