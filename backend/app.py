@@ -3,7 +3,8 @@
 # Flask creates the backend application
 # request lets you inspect incoming HTTP requests
 # jsonify converts Python data to JSON format for API responses
-from flask import Flask, request, jsonify
+# send_from_directory is used to serve uploaded images so the frontend can display them
+from flask import Flask, request, jsonify, send_from_directory
 
 from flask_cors import CORS # Allows cross-origin requests from frontend (e.g., localhost:8000) to backend (localhost:3000)
 
@@ -214,6 +215,12 @@ def upload_image():
             "size_xxl": size_xxl
         }
     })
+
+# --- Serve Uploaded Images Route ---
+# Allows the frontend to access uploaded images via /images/<filename>
+@app.route("/images/<filename>")
+def serve_image(filename):
+    return send_from_directory(UPLOAD_FOLDER, filename)
 
 # Run server only if script is executed directly (not imported elsewhere)
 if __name__ == "__main__":
