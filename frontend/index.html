@@ -152,16 +152,70 @@
 
                     // --- Other Cells ---
                     row.insertCell().innerText = item.filename;
-                    row.insertCell().innerText = item.size_s?? "-"; // Display "-" if size_s is null or undefined
-                    row.insertCell().innerText = item.size_m?? "-"; // Display "-" if size_m is null or undefined
-                    row.insertCell().innerText = item.size_l?? "-"; // Display "-" if size_l is null or undefined
-                    row.insertCell().innerText = item.size_xl?? "-"; // Display "-" if size_xl is null or undefined
-                    row.insertCell().innerText = item.size_xxl?? "-"; // Display "-" if size_xxl is null or undefined
+
+                    function createInputCell(value, name, id) {
+                        const input = document.createElement("input");
+                        input.type = "number";
+                        input.className = "form-control form-control-sm"; // Add Bootstrap classes to the input for styling
+                        input.value = value ?? ""; // Use nullish coalescing operator to set empty string if value is null or undefined
+
+                        input.name = name; // Set the name attribute for the input, which can be used to identify the field when sending data to the backend
+                        input.id = `${name}_${item.id}`; // Set the id attribute for the input, which can be used for labeling and accessibility purposes
+
+                        return input;
+                    }
+
+                    const sInput = createInputCell(item.size_s, "size_s", item.id);
+                    const mInput = createInputCell(item.size_m, "size_m", item.id);
+                    const lInput = createInputCell(item.size_l, "size_l", item.id);
+                    const xlInput = createInputCell(item.size_xl, "size_xl", item.id);
+                    const xxlInput = createInputCell(item.size_xxl, "size_xxl", item.id);
+
+                    row.insertCell().appendChild(sInput);
+                    row.insertCell().appendChild(mInput);
+                    row.insertCell().appendChild(lInput);
+                    row.insertCell().appendChild(xlInput);
+                    row.insertCell().appendChild(xxlInput);
+
+                    // --- Action Cell ---
+                    const actionCell = row.insertCell();
+                    
+                    // --- Save Button ---
+                    const saveBtn = document.createElement("button");
+                    saveBtn.innerText = "Save";
+                    saveBtn.className = "btn btn-primary btn-sm me-2"; // Add Bootstrap classes to the button for styling
+
+                    // Add click event listener to the save button to send a PUT request to the backend with the updated size data
+                    saveBtn.onclick = async () => {
+                        // Send a PUT request to the backend with the updated size data for the specific item
+                        try {
+                            await fetch(`http://localhost:3000/update-item/${item.id}`, {
+                                method: "PUT",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    size_s: sInput.value || null, // Convert empty string to null for backend compatibility
+                                    size_m: mInput.value || null,
+                                    size_l: lInput.value || null,
+                                    size_xl: xlInput.value || null,
+                                    size_xxl: xxlInput.value || null
+                                })
+                            });
+
+                            // Refresh table after update
+                            loadInventory();
+
+                        } catch (error) {
+                            alert("Failed to update item");
+                        }
+                    };
+
+                    // Append the save button to the action cell
+                    actionCell.appendChild(saveBtn);
 
                     // --- Delete Button ---
-                    const actionCell = row.insertCell();
                     const deleteBtn = document.createElement("button");
-
                     deleteBtn.innerText = "Delete";
                     deleteBtn.className = "btn btn-danger btn-sm"; // Add Bootstrap classes to the button for styling
 

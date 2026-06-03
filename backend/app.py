@@ -12,7 +12,7 @@ from flask_cors import CORS # Allows cross-origin requests from frontend (e.g., 
 app = Flask(__name__)
 
 # Enable CORS
-CORS(app, methods=["GET", "POST", "DELETE", "OPTIONS"]) # Enable CORS for the Flask app, allowing requests from any origin (for development purposes)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True), # Allows all origins to access the API, necessary for frontend-backend communication during development
 
 # Import database initialization function and DB path
 # NOTE: Python must import init_db() so it can be called before the server starts
@@ -259,6 +259,45 @@ def delete_item(item_id):
     return jsonify({
         "status": "success",
         "message": f"Item {item_id} deleted"
+    })
+
+# --- Update Item Route ---
+@app.route("/update-item/<int:item_id>", methods=["PUT", "OPTIONS"]) # Route definition: listens for PUT requests at /update-item/<item_id>
+def update_item(item_id):
+
+    if request.method == "OPTIONS":
+        return '', 200 # Respond to preflight OPTIONS request with 200 OK
+
+    # Get request data sent by the client in JSON format
+    data = request.get_json()
+
+    # Connect to the database
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    
+    # Update the shirt sizes for the specified item ID using parameterized queries to prevent SQL injection
+    cursor.execute("""
+        UPDATE shirts
+        SET size_s = ?, size_m = ?, size_l = ?, size_xl = ?, size_xxl = ?
+        WHERE id = ?
+    """, (
+        data.get("size_s"),
+        data.get("size_m"),
+        data.get("size_l"),
+        data.get("size_xl"),
+        data.get("size_xxl"),
+        item_id
+    ))
+
+    # Save changes to the database and close the connection
+    conn.commit()
+    conn.close()
+
+    # Return JSON response confirming update
+    return jsonify({
+        "status": "success",
+        "message": f"Item {item_id} updated"
     })
 
 # Run server only if script is executed directly (not imported elsewhere)
