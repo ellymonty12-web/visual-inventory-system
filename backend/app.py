@@ -12,7 +12,7 @@ from flask_cors import CORS # Allows cross-origin requests from frontend (e.g., 
 app = Flask(__name__)
 
 # Enable CORS
-CORS(app) # Enable CORS for the Flask app, allowing requests from any origin (for development purposes)
+CORS(app, methods=["GET", "POST", "DELETE", "OPTIONS"]) # Enable CORS for the Flask app, allowing requests from any origin (for development purposes)
 
 # Import database initialization function and DB path
 # NOTE: Python must import init_db() so it can be called before the server starts
@@ -221,6 +221,28 @@ def upload_image():
 @app.route("/images/<filename>")
 def serve_image(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
+
+# --- Delete Item Route ---
+@app.route("/delete-item/<int:item_id>", methods=["DELETE", "OPTIONS"]) # Route definition: listens for DELETE requests at /delete-item/<item_id>
+def delete_item(item_id):
+
+    if request.method == "OPTIONS":
+        return '', 200 # Respond to preflight OPTIONS request with 200 OK
+
+    # Connect to the database
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    # Execute SQL query to delete the item with the specified ID
+    cursor.execute("DELETE FROM shirts WHERE id = ?", (item_id,))
+    conn.commit() # Save changes to the database
+    conn.close() # Close database connection
+
+    # Return JSON response confirming deletion
+    return jsonify({
+        "status": "success",
+        "message": f"Item {item_id} deleted"
+    })
 
 # Run server only if script is executed directly (not imported elsewhere)
 if __name__ == "__main__":
