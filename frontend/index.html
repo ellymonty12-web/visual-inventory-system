@@ -1,42 +1,66 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <!-- Include Bootstrap CSS for styling the form and table -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <title>VIMS Upload</title>
 </head>
-<body>
+<body class="bg-light">
+    <div class="container mt-5">
 
     <!-- Form for uploading shirt image and size data -->
-    <h1>Upload Shirt</h1>
-    <form id="uploadForm">
+    <h1 class="mb-4">Upload Shirt</h1>
+    <form id="uploadForm" class="card p-4 shadow-sm">
         <!-- File input for shirt image
          NOTE: type="file" allows users to select a file from their device
          NOTE: The 'name' attribute must match the expected field name in the backend -->
-        <input type="file"  name="image" required><br><br>
+        <div class="mb-3">
+            <input type="file"  name="image" class="form-control" required>
+        </div>
 
         <!-- Size inputs 
          NOTE: type="number" creates a numeric input field
          NOTE: The 'name' attribute must match the expected field name in the backend
          NOTE: The 'min' attribute sets the minimum value for the input -->
-        <label>S:</label> <input type="number" name="size_s" min="0"><br>
-        <label>M:</label> <input type="number" name="size_m" min="0"><br>
-        <label>L:</label> <input type="number" name="size_l" min="0"><br>
-        <label>XL:</label> <input type="number" name="size_xl" min="0"><br>
-        <label>XXL:</label> <input type="number" name="size_xxl" min="0"><br><br>
+         <div class="mb-3">
+            <label for="size_s">S:</label>
+            <input id="size_s" type="number" name="size_s" class="form-control" min="0">
+         </div>
+
+        <div class="mb-3">
+            <label for="size_m">M:</label>
+            <input id="size_m" type="number" name="size_m" class="form-control" min="0">
+        </div>
+
+        <div class="mb-3">
+            <label for="size_l">L:</label>
+            <input id="size_l" type="number" name="size_l" class="form-control" min="0">
+        </div>
+
+        <div class="mb-3">
+            <label for="size_xl">XL:</label>
+            <input id="size_xl" type="number" name="size_xl" class="form-control" min="0">
+        </div>
+
+        <div class="mb-3">
+            <label for="size_xxl">XXL:</label>
+            <input id="size_xxl" type="number" name="size_xxl" class="form-control" min="0">
+        </div>
 
         <!-- Submit button to upload the form data to the backend -->
-        <button type="submit">Upload</button>
+        <button type="submit" class="btn btn-primary w-100">Upload</button>
     </form>
 
     <hr>
 
-    <h2>Inventory</h2>
+    <h2 class="mt-5">Inventory</h2>
     <!-- Button to call the loadInventory function -->
-    <button onclick="loadInventory()">Load Inventory</button>
+    <button onclick="loadInventory()" class="btn btn-success mt-3">Load Inventory</button>
     <!-- Div to display the inventory data fetched from the backend -->
-    <div id="inventory"></div>
+    <div id="inventory" class="card p-3 mt-4"></div>
 
     <!-- Display response from backend -->
-    <pre id="response"></pre>
+    <pre id="response" class="bg-white p-2 mt-3"></pre>
 
     <!-- JavaScript to handle form submission and fetch inventory data -->
     <script>
@@ -101,13 +125,14 @@
 
                 // Create table
                 const table = document.createElement("table");
-                table.border = "1";
+                table.className = "table table-striped table-bordered table-hover"; // Add Bootstrap classes to the table for styling
 
                 // Create header row
-                const header = table.insertRow();
+                const header = table.createTHead().insertRow();
                 ["Image", "Filename", "S", "M", "L", "XL", "XXL"].forEach(text => {
-                    const cell = header.insertCell();
-                    cell.innerText = text;
+                    const th = document.createElement("th");
+                    th.innerText = text;
+                    header.appendChild(th);
                 });
 
                 // Add data rows
@@ -120,6 +145,7 @@
 
                     img.src = `http://localhost:3000/images/${item.filename}`; // Set image source to the URL where the backend serves uploaded images
                     img.width = 80; // adjust size as needed
+                    img.className = "img-thumbnail"; // Add Bootstrap class to the image for styling
 
                     // Append the image element to the cell
                     imgCell.appendChild(img);
@@ -143,5 +169,7 @@
             }
         }
     </script>
+
+    </div>
 </body>
 </html>
