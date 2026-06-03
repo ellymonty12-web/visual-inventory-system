@@ -32,8 +32,8 @@
     <h2>Inventory</h2>
     <!-- Button to call the loadInventory function -->
     <button onclick="loadInventory()">Load Inventory</button>
-    <!-- Preformatted text area to display the inventory data fetched from the backend -->
-    <pre id="inventory"></pre>
+    <!-- Div to display the inventory data fetched from the backend -->
+    <div id="inventory"></div>
 
     <!-- Display response from backend -->
     <pre id="response"></pre>
@@ -94,9 +94,38 @@
                 // Parse the JSON response from the server
                 const data = await response.json();
 
-                // Display the fetched inventory data
-                document.getElementById("inventory").innerText =
-                    JSON.stringify(data, null, 2); // Pretty-print the JSON response with indentation for better readability
+                const container = document.getElementById("inventory");
+
+                // Clear previous content
+                container.innerHTML = "";
+
+                // Create table
+                const table = document.createElement("table");
+                table.border = "1";
+
+                // Create header row
+                const header = table.insertRow();
+                ["ID", "Filename", "S", "M", "L", "XL", "XXL"].forEach(text => {
+                    const cell = header.insertCell();
+                    cell.innerText = text;
+                });
+
+                // Add data rows
+                data.data.forEach(item => {
+                    const row = table.insertRow();
+
+                    // Insert cells for each item property and set their text content
+                    row.insertCell().innerText = item.id;
+                    row.insertCell().innerText = item.filename;
+                    row.insertCell().innerText = item.size_s;
+                    row.insertCell().innerText = item.size_m;
+                    row.insertCell().innerText = item.size_l;
+                    row.insertCell().innerText = item.size_xl;
+                    row.insertCell().innerText = item.size_xxl;
+                });
+
+                // Add table to page
+                container.appendChild(table);
 
             // Catch any errors that occur during the fetch request and display an error message
             } catch (error) {
