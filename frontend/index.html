@@ -54,6 +54,15 @@
     <hr>
 
     <h2 class="mt-5">Inventory</h2>
+    
+    <!-- Input field for searching inventory by filename -->
+    <input
+        type="text"
+        id="searchInput"
+        class="form-control mt-3"
+        placeholder="Search by filename..."
+    >
+    
     <!-- Button to call the loadInventory function -->
     <button onclick="loadInventory()" class="btn btn-success mt-3">Load Inventory</button>
     <!-- Div to display the inventory data fetched from the backend -->
@@ -64,6 +73,8 @@
 
     <!-- JavaScript to handle form submission and fetch inventory data -->
     <script>
+        let inventoryData = []; // Global variable to store inventory data for search functionality
+
         // Get the form element by its ID, stored in a variable
         const form = document.getElementById('uploadForm');
 
@@ -89,6 +100,7 @@
 
                 // Parse the JSON response from the server
                 const data = await response.json();
+                inventoryData = data.data; // Store the fetched inventory data in the global variable for search functionality
 
                 // Reset the form after successful submission to clear the input fields
                 form.reset();
@@ -118,128 +130,9 @@
                 // Parse the JSON response from the server
                 const data = await response.json();
 
-                const container = document.getElementById("inventory");
+                inventoryData = data.data; // Store the fetched inventory data in the global variable for search functionality
 
-                // Clear previous content
-                container.innerHTML = "";
-
-                // Create table
-                const table = document.createElement("table");
-                table.className = "table table-striped table-bordered table-hover"; // Add Bootstrap classes to the table for styling
-
-                // Create header row
-                const header = table.createTHead().insertRow();
-                ["Image", "Filename", "S", "M", "L", "XL", "XXL", "Actions"].forEach(text => {
-                    const th = document.createElement("th");
-                    th.innerText = text;
-                    header.appendChild(th);
-                });
-
-                // Add data rows
-                data.data.forEach(item => {
-                    const row = table.insertRow();
-
-                    // --- Image Cell ---
-                    const imgCell = row.insertCell();
-                    const img = document.createElement("img");
-
-                    img.src = `http://localhost:3000/images/${item.filename}`; // Set image source to the URL where the backend serves uploaded images
-                    img.width = 80; // adjust size as needed
-                    img.className = "img-thumbnail"; // Add Bootstrap class to the image for styling
-
-                    // Append the image element to the cell
-                    imgCell.appendChild(img);
-
-                    // --- Other Cells ---
-                    row.insertCell().innerText = item.filename;
-
-                    function createInputCell(value, name, id) {
-                        const input = document.createElement("input");
-                        input.type = "number";
-                        input.className = "form-control form-control-sm"; // Add Bootstrap classes to the input for styling
-                        input.value = value ?? ""; // Use nullish coalescing operator to set empty string if value is null or undefined
-
-                        input.name = name; // Set the name attribute for the input, which can be used to identify the field when sending data to the backend
-                        input.id = `${name}_${item.id}`; // Set the id attribute for the input, which can be used for labeling and accessibility purposes
-
-                        return input;
-                    }
-
-                    const sInput = createInputCell(item.size_s, "size_s", item.id);
-                    const mInput = createInputCell(item.size_m, "size_m", item.id);
-                    const lInput = createInputCell(item.size_l, "size_l", item.id);
-                    const xlInput = createInputCell(item.size_xl, "size_xl", item.id);
-                    const xxlInput = createInputCell(item.size_xxl, "size_xxl", item.id);
-
-                    row.insertCell().appendChild(sInput);
-                    row.insertCell().appendChild(mInput);
-                    row.insertCell().appendChild(lInput);
-                    row.insertCell().appendChild(xlInput);
-                    row.insertCell().appendChild(xxlInput);
-
-                    // --- Action Cell ---
-                    const actionCell = row.insertCell();
-                    
-                    // --- Save Button ---
-                    const saveBtn = document.createElement("button");
-                    saveBtn.innerText = "Save";
-                    saveBtn.className = "btn btn-primary btn-sm me-2"; // Add Bootstrap classes to the button for styling
-
-                    // Add click event listener to the save button to send a PUT request to the backend with the updated size data
-                    saveBtn.onclick = async () => {
-                        // Send a PUT request to the backend with the updated size data for the specific item
-                        try {
-                            await fetch(`http://localhost:3000/update-item/${item.id}`, {
-                                method: "PUT",
-                                headers: {
-                                    "Content-Type": "application/json"
-                                },
-                                body: JSON.stringify({
-                                    size_s: sInput.value || null, // Convert empty string to null for backend compatibility
-                                    size_m: mInput.value || null,
-                                    size_l: lInput.value || null,
-                                    size_xl: xlInput.value || null,
-                                    size_xxl: xxlInput.value || null
-                                })
-                            });
-
-                            // Refresh table after update
-                            loadInventory();
-
-                        } catch (error) {
-                            alert("Failed to update item");
-                        }
-                    };
-
-                    // Append the save button to the action cell
-                    actionCell.appendChild(saveBtn);
-
-                    // --- Delete Button ---
-                    const deleteBtn = document.createElement("button");
-                    deleteBtn.innerText = "Delete";
-                    deleteBtn.className = "btn btn-danger btn-sm"; // Add Bootstrap classes to the button for styling
-
-                    // Add click event listener to the delete button to send a DELETE request to the backend
-                    deleteBtn.onclick = async () => {
-                        try {
-                            await fetch(`http://localhost:3000/delete-item/${item.id}`, {
-                                method: "DELETE"
-                            });
-
-                            // Refresh table after deletion
-                            loadInventory();
-
-                        } catch (error) {
-                            alert("Failed to delete item");
-                        }
-                    };
-
-                    // Append the delete button to the action cell
-                    actionCell.appendChild(deleteBtn);
-                });
-
-                // Add table to page
-                container.appendChild(table);
+                renderTable(inventoryData); // Call the function to render the inventory data in a table format
 
             // Catch any errors that occur during the fetch request and display an error message
             } catch (error) {
@@ -247,6 +140,122 @@
                     "Error loading inventory";
             }
         }
+
+        // Function to render inventory data in a table format
+        function renderTable(items) {
+            const container = document.getElementById("inventory");
+            container.innerHTML = ""; // Clear previous content
+
+            const table = document.createElement("table");
+            table.className = "table table-striped table-bordered table-hover"; // Add Bootstrap classes to the table for styling
+
+            // Create header row
+            const header = table.createTHead().insertRow();
+            ["Image", "Filename", "S", "M", "L", "XL", "XXL", "Actions"].forEach(text => {
+                const th = document.createElement("th");
+                th.innerText = text;
+                header.appendChild(th);
+            });
+
+            // Add data rows
+            items.forEach(item => {
+                const row = table.insertRow();
+
+                // --- Image Cell ---
+                const imgCell = row.insertCell();
+                const img = document.createElement("img");
+
+                img.src = `http://localhost:3000/images/${item.filename}`; // Set image source to the URL where the backend serves uploaded images
+                img.width = 80; // adjust size as needed
+                img.className = "img-thumbnail"; // Add Bootstrap class to the image for styling
+
+                // Append the image element to the cell
+                imgCell.appendChild(img);
+
+                // Filename cell
+                row.insertCell().innerText = item.filename;
+
+                function createInputCell(value, name, id) {
+                    const input = document.createElement("input");
+                    input.type = "number";
+                    input.className = "form-control form-control-sm"; // Add Bootstrap classes to the input for styling
+                    input.value = value ?? ""; // Use nullish coalescing operator to set empty string if value is null or undefined
+
+                    input.name = name; // Set the name attribute for the input, which can be used to identify the field when sending data to the backend
+                    input.id = `${name}-${item.id}`; // Set the id attribute for the input, which can be used for labeling and accessibility purposes
+
+                    return input;
+                }
+
+                // Create input cells for each size and append them to the row
+                const sInput = createInputCell(item.size_s, "size_s", item.id);
+                const mInput = createInputCell(item.size_m, "size_m", item.id);
+                const lInput = createInputCell(item.size_l, "size_l", item.id);
+                const xlInput = createInputCell(item.size_xl, "size_xl", item.id);
+                const xxlInput = createInputCell(item.size_xxl, "size_xxl", item.id);
+
+                // Append the input elements to their respective cells in the row
+                row.insertCell().appendChild(sInput);
+                row.insertCell().appendChild(mInput);
+                row.insertCell().appendChild(lInput);
+                row.insertCell().appendChild(xlInput);
+                row.insertCell().appendChild(xxlInput);
+
+                // Create action cell for Save and Delete buttons
+                const actionCell = row.insertCell();
+
+                // --- Save Button ---
+                const saveBtn = document.createElement("button");
+                saveBtn.innerText = "Save";
+                saveBtn.className = "btn btn-primary btn-sm me-2"; // Add Bootstrap
+
+                saveBtn.onclick = async () => {
+                    await fetch(`http://localhost:3000/update-item/${item.id}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            size_s: sInput.value || null, // Convert empty string to null for backend compatibility
+                            size_m: mInput.value || null,
+                            size_l: lInput.value || null,
+                            size_xl: xlInput.value || null,
+                            size_xxl: xxlInput.value || null
+                        })
+                    });
+                    loadInventory();
+                };
+
+                actionCell.appendChild(saveBtn);
+
+                // --- Delete Button ---
+                const deleteBtn = document.createElement("button");
+                deleteBtn.innerText = "Delete";
+                deleteBtn.className = "btn btn-danger btn-sm"; // Add Bootstrap classes to the button for styling
+
+                deleteBtn.onclick = async () => {
+                    await fetch(`http://localhost:3000/delete-item/${item.id}`, {
+                        method: "DELETE"
+                    });
+                    loadInventory();
+                };
+
+                actionCell.appendChild(deleteBtn);
+            });
+
+            // Add table to page
+            container.appendChild(table);
+        }
+
+        document.getElementById("searchInput").addEventListener("input", function() {
+            const query = this.value.toLowerCase();
+
+            const filtered = inventoryData.filter(item =>
+                item.filename.toLowerCase().includes(query)
+            );
+
+            renderTable(filtered);
+        });
     </script>
 
     </div>
