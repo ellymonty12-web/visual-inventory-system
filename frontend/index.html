@@ -66,7 +66,7 @@
     <!-- Button to call the loadInventory function -->
     <button onclick="loadInventory()" class="btn btn-success mt-3">Load Inventory</button>
     <!-- Div to display the inventory data fetched from the backend -->
-    <div id="inventory" class="card p-3 mt-4"></div>
+    <div id="inventory" class="card p-3 mt-4 table-responsive"></div>
 
     <!-- Display response from backend -->
     <pre id="response" class="bg-white p-2 mt-3"></pre>
@@ -179,6 +179,7 @@
                     const input = document.createElement("input");
                     input.type = "number";
                     input.className = "form-control form-control-sm"; // Add Bootstrap classes to the input for styling
+                    input.style.minWidth = "60px"; // Set a minimum width for the input to prevent it from being too small
                     input.value = value ?? ""; // Use nullish coalescing operator to set empty string if value is null or undefined
 
                     input.name = name; // Set the name attribute for the input, which can be used to identify the field when sending data to the backend
