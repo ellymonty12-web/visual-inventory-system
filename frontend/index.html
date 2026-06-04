@@ -172,8 +172,15 @@
                 // Append the image element to the cell
                 imgCell.appendChild(img);
 
-                // Filename cell
-                row.insertCell().innerText = item.filename;
+                const nameInput = document.createElement("input");
+                nameInput.type = "text";
+                nameInput.className = "form-control form-control-sm"; // Add Bootstrap classes to the input for styling
+                nameInput.value = item.display_name || item.filename; // Use display_name if available, otherwise fallback to filename
+
+                nameInput.name = "display_name"; // Set the name attribute for the input, which can be used to identify the field when sending data to the backend
+                nameInput.id = `display_name-${item.id}`; // Set the id attribute for the input, which can be used for labeling and accessibility purposes
+
+                row.insertCell().appendChild(nameInput); // Append the name input to the second cell in the row
 
                 function createInputCell(value, name, id) {
                     const input = document.createElement("input");
@@ -217,6 +224,7 @@
                             "Content-Type": "application/json"
                         },
                         body: JSON.stringify({
+                            display_name: nameInput.value || item.filename, // Use the value from the name input, or fallback to the original filename if the input is empty
                             size_s: sInput.value || null, // Convert empty string to null for backend compatibility
                             size_m: mInput.value || null,
                             size_l: lInput.value || null,
@@ -252,7 +260,7 @@
             const query = this.value.toLowerCase();
 
             const filtered = inventoryData.filter(item =>
-                item.filename.toLowerCase().includes(query)
+                (item.display_name || item.filename).toLowerCase().includes(query)
             );
 
             renderTable(filtered);

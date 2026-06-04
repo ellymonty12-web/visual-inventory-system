@@ -123,7 +123,8 @@ def get_items():
             "size_m": row[3],
             "size_l": row[4],
             "size_xl": row[5],
-            "size_xxl": row[6]
+            "size_xxl": row[6],
+            "display_name": row[7] if len(row) > 7 else None # Handle case where display_name column may not exist in older database versions
         })
 
     # Return JSON response containing the list of inventory items
@@ -161,6 +162,7 @@ def upload_image():
     # --- Secure the filename ---
     # Prevents malicious or invalid file paths
     filename = secure_filename(file.filename)
+    display_name = request.form.get("display_name") or filename  # Optional display name for the image, defaults to the original filename if not provided
 
     # --- Save file ---
     # Create full path to save the file: UPLOAD_FOLDER + original filename
@@ -196,9 +198,9 @@ def upload_image():
     cursor = conn.cursor()
 
     cursor.execute("""
-        INSERT INTO shirts (filename, size_s, size_m, size_l, size_xl, size_xxl)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (filename, size_s, size_m, size_l, size_xl, size_xxl))
+        INSERT INTO shirts (filename, display_name, size_s, size_m, size_l, size_xl, size_xxl)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (filename, display_name, size_s, size_m, size_l, size_xl, size_xxl))
 
     # Get inserted row ID
     item_id = cursor.lastrowid # Retrieves the ID of the newly inserted record
@@ -213,6 +215,7 @@ def upload_image():
         "data": {
             "id": item_id,
             "filename": filename,
+            "display_name": display_name,
             "size_s": size_s,
             "size_m": size_m,
             "size_l": size_l,
@@ -279,9 +282,10 @@ def update_item(item_id):
     # Update the shirt sizes for the specified item ID using parameterized queries to prevent SQL injection
     cursor.execute("""
         UPDATE shirts
-        SET size_s = ?, size_m = ?, size_l = ?, size_xl = ?, size_xxl = ?
+        SET display_name = ?, size_s = ?, size_m = ?, size_l = ?, size_xl = ?, size_xxl = ?
         WHERE id = ?
     """, (
+        data.get("display_name"),
         data.get("size_s"),
         data.get("size_m"),
         data.get("size_l"),
