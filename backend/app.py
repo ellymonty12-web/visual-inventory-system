@@ -34,6 +34,8 @@ from werkzeug.utils import secure_filename
 # BASE_DIR now points to the backend directory
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+FRONTEND_FOLDER = os.path.join(BASE_DIR, "..", "frontend") # Path to the frontend directory, used for serving index.html
+
 # Move up one level to .../ (project root), then add "images" folder
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "..", "images")
 
@@ -135,12 +137,11 @@ def get_items():
         "data": items
     })
 
-# --- Root Route ---
-# Creates endpoint GET / when localhost:3000 is visited
+# --- Serve Frontend Route ---
+# This route serves the frontend index.html file when the root URL (/) is accessed.
 @app.route("/")
-def home():
-    # Returns a simple message to confirm backend is running
-    return "VIMS Backend Running 🚀"
+def serve_frontend():
+    return send_from_directory(FRONTEND_FOLDER, "index.html") # Sends the index.html file from the frontend directory when the root URL is accessed, allowing the frontend to be served by the Flask backend during development
 
 # --- Upload Route ---
 # Creates endpoint POST /upload, only accepts POST requests
