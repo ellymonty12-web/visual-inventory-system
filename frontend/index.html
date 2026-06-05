@@ -60,7 +60,7 @@
         type="text"
         id="searchInput"
         class="form-control mt-3"
-        placeholder="Search by filename..."
+        placeholder="Search by name..."
     >
     
     <!-- Button to call the loadInventory function -->
@@ -73,6 +73,9 @@
 
     <!-- JavaScript to handle form submission and fetch inventory data -->
     <script>
+        const API_BASE = ""; // Base URL for API calls, empty string means same origin (localhost:3000 when backend is running)
+
+
         let inventoryData = []; // Global variable to store inventory data for search functionality
 
         // Get the form element by its ID, stored in a variable
@@ -88,7 +91,7 @@
 
             try {
                 // Send a POST request to the backend with the form data
-                const response = await fetch("http://localhost:3000/upload", {
+                const response = await fetch("/upload", {
                     method: 'POST',
                     body: formData
                 });
@@ -120,7 +123,7 @@
         async function loadInventory() {
             try {
                 // Send a GET request to the backend to fetch inventory data
-                const response = await fetch("http://localhost:3000/items");
+                const response = await fetch("/items");
 
                 // Check if the response status indicates an error (not 2xx)
                 if (!response.ok) {
@@ -165,7 +168,7 @@
                 const imgCell = row.insertCell();
                 const img = document.createElement("img");
 
-                img.src = `http://localhost:3000/images/${item.filename}`; // Set image source to the URL where the backend serves uploaded images
+                img.src = `/images/${item.filename}`; // Set the source of the image to the URL where the backend serves uploaded images
                 img.width = 80; // adjust size as needed
                 img.className = "img-thumbnail"; // Add Bootstrap class to the image for styling
 
@@ -218,7 +221,7 @@
                 saveBtn.className = "btn btn-primary btn-sm me-2"; // Add Bootstrap
 
                 saveBtn.onclick = async () => {
-                    await fetch(`http://localhost:3000/update-item/${item.id}`, {
+                    await fetch(`/update-item/${item.id}`, {
                         method: "PUT",
                         headers: {
                             "Content-Type": "application/json"
@@ -243,7 +246,7 @@
                 deleteBtn.className = "btn btn-danger btn-sm"; // Add Bootstrap classes to the button for styling
 
                 deleteBtn.onclick = async () => {
-                    await fetch(`http://localhost:3000/delete-item/${item.id}`, {
+                    await fetch(`/delete-item/${item.id}`, {
                         method: "DELETE"
                     });
                     loadInventory();
