@@ -6,7 +6,7 @@
     <title>VIMS Upload</title>
 </head>
 <body class="bg-light">
-    <div class="container mt-5">
+    <div class="container-fluid px-3 mt-4">
 
     <!-- Form for uploading shirt image and size data -->
     <h1 class="mb-4">Upload Shirt</h1>
@@ -63,19 +63,14 @@
         placeholder="Search by name..."
     >
     
-    <!-- Button to call the loadInventory function -->
-    <button onclick="loadInventory()" class="btn btn-success mt-3">Load Inventory</button>
     <!-- Div to display the inventory data fetched from the backend -->
     <div id="inventory" class="card p-3 mt-4 table-responsive"></div>
 
     <!-- Display response from backend -->
-    <pre id="response" class="bg-white p-2 mt-3"></pre>
+    <div id="response" class="alert mt-3 d-none"></div>
 
     <!-- JavaScript to handle form submission and fetch inventory data -->
     <script>
-        const API_BASE = ""; // Base URL for API calls, empty string means same origin (localhost:3000 when backend is running)
-
-
         let inventoryData = []; // Global variable to store inventory data for search functionality
 
         // Get the form element by its ID, stored in a variable
@@ -103,7 +98,8 @@
 
                 // Parse the JSON response from the server
                 const data = await response.json();
-                inventoryData = data.data; // Store the fetched inventory data in the global variable for search functionality
+
+                loadInventory(); // Refresh the inventory list after a successful upload
 
                 // Reset the form after successful submission to clear the input fields
                 form.reset();
@@ -111,6 +107,15 @@
                 // Displays upload response from the backend
                 document.getElementById("response").innerText =
                     JSON.stringify(data, null, 2); // Pretty-print the JSON response with indentation for better readability
+
+                inventoryData = data.data; // Store the fetched inventory data in the global variable for search functionality
+
+                const responseBox = document.getElementById("response");
+                responseBox.className = "alert alert-success mt-3"; // Update the class to show a success message
+                responseBox.innerText = "Upload successful"; // Show a simple message to indicate that the item has been saved successfully.
+                responseBox.classList.remove("d-none");
+
+                window.scrollTo(0, 0); // Scroll to the top of the page to ensure the response message is visible after uploading
 
             // Catch any errors that occur during the fetch request and display an error message
             } catch (error) {
@@ -121,6 +126,8 @@
 
         // Load Inventory function to fetch inventory data from the backend
         async function loadInventory() {
+            document.getElementById("inventory").innerText = "Loading..."; // Show loading message while fetching data
+
             try {
                 // Send a GET request to the backend to fetch inventory data
                 const response = await fetch("/items");
@@ -151,6 +158,7 @@
 
             const table = document.createElement("table");
             table.className = "table table-striped table-bordered table-hover"; // Add Bootstrap classes to the table for styling
+            table.style.fontSize = "16px"; // Set a larger font size for better readability
 
             // Create header row
             const header = table.createTHead().insertRow();
@@ -163,6 +171,10 @@
             // Add data rows
             items.forEach(item => {
                 const row = table.insertRow();
+                row.style.lineHeight = "1.6"; // Increase line height for better spacing between rows
+                row.style.verticalAlign = "middle"; // Vertically center the content in the row
+                row.style.padding = "10px"; // Add padding to the row for better spacing
+                row.style.borderBottom = "10px solid #f8f9fa"; // Add a thicker bottom border to create more space between rows, using a light color to blend with the background
 
                 // --- Image Cell ---
                 const imgCell = row.insertCell();
@@ -185,10 +197,11 @@
 
                 row.insertCell().appendChild(nameInput); // Append the name input to the second cell in the row
 
+                // Helper function to create an input cell for a given size
                 function createInputCell(value, name, id) {
                     const input = document.createElement("input");
                     input.type = "number";
-                    input.className = "form-control form-control-sm"; // Add Bootstrap classes to the input for styling
+                    input.className = "form-control form-control-lg"; // Add Bootstrap classes to the input for styling
                     input.style.minWidth = "60px"; // Set a minimum width for the input to prevent it from being too small
                     input.value = value ?? ""; // Use nullish coalescing operator to set empty string if value is null or undefined
 
@@ -214,11 +227,12 @@
 
                 // Create action cell for Save and Delete buttons
                 const actionCell = row.insertCell();
+                actionCell.style.minWidth = "140px"; // Set a minimum width for the action cell to ensure buttons have enough space
 
                 // --- Save Button ---
                 const saveBtn = document.createElement("button");
                 saveBtn.innerText = "Save";
-                saveBtn.className = "btn btn-primary btn-sm me-2"; // Add Bootstrap
+                saveBtn.className = "btn btn-primary btn-lg w-100 mb-2"; // Add Bootstrap classes to the button for styling
 
                 saveBtn.onclick = async () => {
                     await fetch(`/update-item/${item.id}`, {
@@ -235,6 +249,14 @@
                             size_xxl: xxlInput.value || null
                         })
                     });
+
+                    window.scrollTo(0, 0); // Scroll to the top of the page to ensure the response message is visible after saving
+
+                    const responseBox = document.getElementById("response");
+                    responseBox.className = "alert alert-success mt-3"; // Update the class to show a success message
+                    responseBox.innerText = "Item saved"; // Show a simple message to indicate that the item has been updated successfully.
+                    responseBox.classList.remove("d-none");
+
                     loadInventory();
                 };
 
@@ -243,12 +265,25 @@
                 // --- Delete Button ---
                 const deleteBtn = document.createElement("button");
                 deleteBtn.innerText = "Delete";
-                deleteBtn.className = "btn btn-danger btn-sm"; // Add Bootstrap classes to the button for styling
+                deleteBtn.className = "btn btn-danger btn-lg w-100"; // Add Bootstrap classes to the button for styling
 
                 deleteBtn.onclick = async () => {
+                    // Show a confirmation dialog to the user before proceeding with the deletion.
+                    if (!confirm("Are you sure you want to delete this item?")) {
+                        return; // Exit the function if the user cancels the deletion
+                    }
+
                     await fetch(`/delete-item/${item.id}`, {
                         method: "DELETE"
                     });
+
+                    window.scrollTo(0, 0); // Scroll to the top of the page to ensure the response message is visible after deletion
+
+                    const responseBox = document.getElementById("response");
+                    responseBox.className = "alert alert-danger mt-3";
+                    responseBox.innerText = "Item deleted";
+                    responseBox.classList.remove("d-none");
+
                     loadInventory();
                 };
 
@@ -259,8 +294,15 @@
             container.appendChild(table);
         }
 
+        // Add event listener to the search input field to filter inventory items as the user types
         document.getElementById("searchInput").addEventListener("input", function() {
             const query = this.value.toLowerCase();
+
+            // Auto-load inventory if not loaded yet
+            if (inventoryData.length === 0) {
+                loadInventory();
+                return;
+            }
 
             const filtered = inventoryData.filter(item =>
                 (item.display_name || item.filename).toLowerCase().includes(query)
@@ -268,6 +310,11 @@
 
             renderTable(filtered);
         });
+
+        // Automatically load inventory when the page loads
+        window.onload = () => {
+            loadInventory();
+        }
     </script>
 
     </div>
