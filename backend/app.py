@@ -175,8 +175,18 @@ def upload_image():
     display_name = request.form.get("display_name") or filename  # Optional display name for the image, defaults to the original filename if not provided
 
     # --- Extract additional fields ---
-    category = request.form.get("category") or "adult shirt" # Optional category field, defaults to "adult shirt" if not provided
-    price = int(request.form.get("price") or 10) # Optional price field, defaults to 10 if not provided, converted to integer
+    category = request.form.get("category") or "adult_10" # Optional category field, defaults to "adult_10" if not provided
+
+    if category == "adult_10":
+        price = 10
+    elif category == "adult_15":
+        price = 15
+    elif category == "adult_hoodie":
+        price = 30
+    elif category == "child":
+        price = 10
+    else:
+        price = 10 # Default price if category is unrecognized
 
     # Get current timestamp for last_updated field
     from datetime import datetime

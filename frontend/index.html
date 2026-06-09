@@ -18,9 +18,24 @@
             <input type="file"  name="image" class="form-control" required>
         </div>
 
+        <!-- Text input for display name
+         NOTE: type="text" creates a single-line text input field
+         NOTE: The 'name' attribute must match the expected field name in the backend -->
         <div class="mb-3">
             <label for="display_name">Display Name:</label>
             <input id="display_name" type="text" name="display_name" class="form-control" placeholder="Enter display item name">
+        </div>
+
+        <!-- Dropdown select for shirt category
+        NOTE: The 'name' attribute must match the expected field name in the backend -->
+        <div class="mb-3">
+            <label for="category">Category:</label>
+            <select id="category" name="category" class="form-control">
+                <option value="adult_10">Adult Shirt ($10)</option>
+                <option value="adult_15">Adult Shirt ($15)</option>
+                <option value="hoodie">Hoodie</option>
+                <option value="child">Child Shirt</option>
+            </select>
         </div>
 
         <!-- Size inputs 
@@ -187,7 +202,7 @@
 
             // Create header row
             const header = table.createTHead().insertRow();
-            ["Image", "Name", "S", "M", "L", "XL", "XXL", "XXXL", "Actions"].forEach(text => {
+            ["Image", "Name", "Category", "S", "M", "L", "XL", "XXL", "XXXL", "Actions"].forEach(text => {
                 const th = document.createElement("th");
                 th.innerText = text;
                 header.appendChild(th);
@@ -220,7 +235,19 @@
                 nameInput.name = "display_name"; // Set the name attribute for the input, which can be used to identify the field when sending data to the backend
                 nameInput.id = `display_name-${item.id}`; // Set the id attribute for the input, which can be used for labeling and accessibility purposes
 
+                // Append the name input to the second cell in the row
                 row.insertCell().appendChild(nameInput); // Append the name input to the second cell in the row
+
+                // Map category values to user-friendly labels for display in the table
+                const categoryLabels = {
+                    "adult_10": "Adult Shirt ($10)",
+                    "adult_15": "Adult Shirt ($15)",
+                    "hoodie": "Hoodie",
+                    "child": "Child Shirt"
+                };
+
+                // Map category values to user-friendly labels for display in the table
+                row.insertCell().innerText = categoryLabels[item.category] || item.category; // Display the user-friendly category label, or fallback to the raw category value if no label is defined
 
                 // Helper function to create an input cell for a given size
                 function createInputCell(value, name, id) {
