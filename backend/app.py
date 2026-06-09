@@ -120,7 +120,7 @@ def get_items():
     for row in rows:
         items.append({
             # Maps each column in the database row to a key in the dictionary
-            # category, price, size_xxxl, and last_updated may be None if they were added after the item was created and not updated yet
+            # The order of columns in the SELECT query determines the index of each field in the row tuple
             "id": row[0], # ID is the first column (index 0)
             "filename": row[1],
             "size_s": row[2],
@@ -132,7 +132,10 @@ def get_items():
             "category": row[8],
             "price": row[9],
             "size_xxxl": row[10],
-            "last_updated": row[11] # last_updated is the thirteenth column (index 12)
+            "last_updated": row[11],
+            "size_6m": row[12],
+            "size_12m": row[13],
+            "size_24m": row[14] # These fields may be None for older records that were created before the child size columns were added
         })
 
     # Return JSON response containing the list of inventory items
@@ -201,6 +204,10 @@ def upload_image():
         size_l = parse_size(request.form.get("size_l"))
         size_xl = parse_size(request.form.get("size_xl"))
         size_xxl = parse_size(request.form.get("size_xxl"))
+        size_xxxl = parse_size(request.form.get("size_xxxl"))
+        size_6m = parse_size(request.form.get("size_6m"))
+        size_12m = parse_size(request.form.get("size_12m"))
+        size_24m = parse_size(request.form.get("size_24m"))
     except ValueError:
         # If any size field is not a valid integer, return an error
         return jsonify({
@@ -215,11 +222,11 @@ def upload_image():
     # Insert the new inventory item into the shirts table, including all relevant fields such as category, price, and last_updated
     cursor.execute("""
         INSERT INTO shirts (
-            filename, display_name, category, price, size_s, size_m, size_l, size_xl, size_xxl, last_updated
+            filename, display_name, category, price, size_s, size_m, size_l, size_xl, size_xxl, size_xxxl, size_6m, size_12m, size_24m, last_updated
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
-        filename, display_name, category, price, size_s, size_m, size_l, size_xl, size_xxl, last_updated
+        filename, display_name, category, price, size_s, size_m, size_l, size_xl, size_xxl, size_xxxl, size_6m, size_12m, size_24m, last_updated
     ))
 
     # Get inserted row ID
@@ -304,7 +311,7 @@ def update_item(item_id):
     # Update the specified fields for the item with the given ID. Only updates fields that are provided in the request data.
     cursor.execute("""
         UPDATE shirts
-        SET display_name = ?, size_s = ?, size_m = ?, size_l = ?, size_xl = ?, size_xxl = ?, size_xxxl = ?, last_updated = ?
+        SET display_name = ?, size_s = ?, size_m = ?, size_l = ?, size_xl = ?, size_xxl = ?, size_xxxl = ?, size_6m = ?, size_12m = ?, size_24m = ?, last_updated = ?
         WHERE id = ?
     """, (
         data.get("display_name"),
@@ -314,6 +321,9 @@ def update_item(item_id):
         data.get("size_xl"),
         data.get("size_xxl"),
         data.get("size_xxxl"),
+        data.get("size_6m"),
+        data.get("size_12m"),
+        data.get("size_24m"),
         last_updated,
         item_id
     ))
