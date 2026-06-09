@@ -18,6 +18,11 @@
             <input type="file"  name="image" class="form-control" required>
         </div>
 
+        <div class="mb-3">
+            <label for="display_name">Display Name:</label>
+            <input id="display_name" type="text" name="display_name" class="form-control" placeholder="Enter display item name">
+        </div>
+
         <!-- Size inputs 
          NOTE: type="number" creates a numeric input field
          NOTE: The 'name' attribute must match the expected field name in the backend
@@ -47,11 +52,19 @@
             <input id="size_xxl" type="number" name="size_xxl" class="form-control" min="0">
         </div>
 
+        <div class="mb-3">
+            <label for="size_xxxl">XXXL:</label>
+            <input id="size_xxxl" type="number" name="size_xxxl" class="form-control" min="0">
+        </div>
+
         <!-- Submit button to upload the form data to the backend -->
         <button type="submit" class="btn btn-primary w-100">Upload</button>
     </form>
 
     <hr>
+
+    <!-- Display response from backend -->
+    <div id="response" class="alert mt-3 d-none"></div> 
 
     <h2 class="mt-5">Inventory</h2>
     
@@ -62,12 +75,9 @@
         class="form-control mt-3"
         placeholder="Search by name..."
     >
-    
+
     <!-- Div to display the inventory data fetched from the backend -->
     <div id="inventory" class="card p-3 mt-4 table-responsive"></div>
-
-    <!-- Display response from backend -->
-    <div id="response" class="alert mt-3 d-none"></div>
 
     <!-- JavaScript to handle form submission and fetch inventory data -->
     <script>
@@ -162,7 +172,7 @@
 
             // Create header row
             const header = table.createTHead().insertRow();
-            ["Image", "Filename", "S", "M", "L", "XL", "XXL", "Actions"].forEach(text => {
+            ["Image", "Name", "S", "M", "L", "XL", "XXL", "XXXL", "Actions"].forEach(text => {
                 const th = document.createElement("th");
                 th.innerText = text;
                 header.appendChild(th);
@@ -217,6 +227,7 @@
                 const lInput = createInputCell(item.size_l, "size_l", item.id);
                 const xlInput = createInputCell(item.size_xl, "size_xl", item.id);
                 const xxlInput = createInputCell(item.size_xxl, "size_xxl", item.id);
+                const xxxlInput = createInputCell(item.size_xxxl, "size_xxxl", item.id);
 
                 // Append the input elements to their respective cells in the row
                 row.insertCell().appendChild(sInput);
@@ -224,6 +235,7 @@
                 row.insertCell().appendChild(lInput);
                 row.insertCell().appendChild(xlInput);
                 row.insertCell().appendChild(xxlInput);
+                row.insertCell().appendChild(xxxlInput);
 
                 // Create action cell for Save and Delete buttons
                 const actionCell = row.insertCell();
@@ -246,7 +258,8 @@
                             size_m: mInput.value || null,
                             size_l: lInput.value || null,
                             size_xl: xlInput.value || null,
-                            size_xxl: xxlInput.value || null
+                            size_xxl: xxlInput.value || null,
+                            size_xxxl: xxxlInput.value || null
                         })
                     });
 
