@@ -109,7 +109,7 @@ def get_items():
     cursor = conn.cursor()
 
     # Execute SQL query to select all rows
-    cursor.execute("SELECT * FROM shirts") # Returns all rows from the shirts table
+    cursor.execute("SELECT * FROM shirts ORDER BY last_updated DESC") # Selects all columns from the shirts table, ordered by last_updated in descending order (newest first)
     rows = cursor.fetchall() # Fetches all results as a list of tuples (not yet in JSON format)
 
     conn.close() # Close database connection
@@ -119,14 +119,20 @@ def get_items():
     items = []
     for row in rows:
         items.append({
-            "id": row[0],
+            # Maps each column in the database row to a key in the dictionary
+            # category, price, size_xxxl, and last_updated may be None if they were added after the item was created and not updated yet
+            "id": row[0], # ID is the first column (index 0)
             "filename": row[1],
             "size_s": row[2],
             "size_m": row[3],
             "size_l": row[4],
             "size_xl": row[5],
             "size_xxl": row[6],
-            "display_name": row[7] if len(row) > 7 else None # Handle case where display_name column may not exist in older database versions
+            "display_name": row[7],
+            "category": row[8],
+            "price": row[9],
+            "size_xxxl": row[10],
+            "last_updated": row[11] # last_updated is the thirteenth column (index 12)
         })
 
     # Return JSON response containing the list of inventory items
@@ -165,6 +171,14 @@ def upload_image():
     filename = secure_filename(file.filename)
     display_name = request.form.get("display_name") or filename  # Optional display name for the image, defaults to the original filename if not provided
 
+    # --- Extract additional fields ---
+    category = request.form.get("category") or "adult shirt" # Optional category field, defaults to "adult shirt" if not provided
+    price = int(request.form.get("price") or 10) # Optional price field, defaults to 10 if not provided, converted to integer
+
+    # Get current timestamp for last_updated field
+    from datetime import datetime
+    last_updated = datetime.now().isoformat() # Get current timestamp in ISO format for last_updated field
+
     # --- Save file ---
     # Create full path to save the file: UPLOAD_FOLDER + original filename
     # filename is sanitized using secure_filename to prevent unsafe file paths
@@ -198,10 +212,15 @@ def upload_image():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
+    # Insert the new inventory item into the shirts table, including all relevant fields such as category, price, and last_updated
     cursor.execute("""
-        INSERT INTO shirts (filename, display_name, size_s, size_m, size_l, size_xl, size_xxl)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (filename, display_name, size_s, size_m, size_l, size_xl, size_xxl))
+        INSERT INTO shirts (
+            filename, display_name, category, price, size_s, size_m, size_l, size_xl, size_xxl, last_updated
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        filename, display_name, category, price, size_s, size_m, size_l, size_xl, size_xxl, last_updated
+    ))
 
     # Get inserted row ID
     item_id = cursor.lastrowid # Retrieves the ID of the newly inserted record
@@ -268,6 +287,8 @@ def delete_item(item_id):
 # --- Update Item Route ---
 @app.route("/update-item/<int:item_id>", methods=["PUT", "OPTIONS"]) # Route definition: listens for PUT requests at /update-item/<item_id>
 def update_item(item_id):
+    from datetime import datetime
+    last_updated = datetime.now().isoformat() # Get current timestamp in ISO format for last_updated field
 
     if request.method == "OPTIONS":
         return '', 200 # Respond to preflight OPTIONS request with 200 OK
@@ -280,10 +301,10 @@ def update_item(item_id):
     cursor = conn.cursor()
 
     
-    # Update the shirt sizes for the specified item ID using parameterized queries to prevent SQL injection
+    # Update the specified fields for the item with the given ID. Only updates fields that are provided in the request data.
     cursor.execute("""
         UPDATE shirts
-        SET display_name = ?, size_s = ?, size_m = ?, size_l = ?, size_xl = ?, size_xxl = ?
+        SET display_name = ?, size_s = ?, size_m = ?, size_l = ?, size_xl = ?, size_xxl = ?, size_xxxl = ?, last_updated = ?
         WHERE id = ?
     """, (
         data.get("display_name"),
@@ -292,6 +313,8 @@ def update_item(item_id):
         data.get("size_l"),
         data.get("size_xl"),
         data.get("size_xxl"),
+        data.get("size_xxxl"),
+        last_updated,
         item_id
     ))
 
