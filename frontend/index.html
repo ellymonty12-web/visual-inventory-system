@@ -1,95 +1,107 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- Ensure the page is responsive on mobile devices -->
     <!-- Include Bootstrap CSS for styling the form and table -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <title>VIMS Upload</title>
 </head>
+<style>
+    input, select {
+        font-size: 16px; /* Set a larger font size for better readability of input fields and dropdowns */
+    }
+</style>
 <body class="bg-light">
     <div class="container-fluid px-3 mt-4">
 
     <!-- Form for uploading shirt image and size data -->
     <h1 class="mb-4">Upload Shirt</h1>
-    <form id="uploadForm" class="card p-4 shadow-sm">
-        <!-- File input for shirt image
-         NOTE: type="file" allows users to select a file from their device
-         NOTE: The 'name' attribute must match the expected field name in the backend -->
-        <div class="mb-3">
-            <input type="file"  name="image" class="form-control" required>
-        </div>
 
-        <!-- Text input for display name
-         NOTE: type="text" creates a single-line text input field
-         NOTE: The 'name' attribute must match the expected field name in the backend -->
-        <div class="mb-3">
-            <label for="display_name">Display Name:</label>
-            <input id="display_name" type="text" name="display_name" class="form-control" placeholder="Enter display item name">
-        </div>
+    <!-- Button to toggle the visibility of the upload form -->
+    <button onclick="toggleUpload()" class="btn btn-secondary w-100 mb-3">Upload Item</button>
 
-        <!-- Dropdown select for shirt category
-        NOTE: The 'name' attribute must match the expected field name in the backend -->
-        <div class="mb-3">
-            <label for="category">Category:</label>
-            <select id="category" name="category" class="form-control">
-                <option value="adult_10">Adult Shirt ($10)</option>
-                <option value="adult_15">Adult Shirt ($15)</option>
-                <option value="hoodie">Hoodie</option>
-                <option value="child">Child Shirt</option>
-            </select>
-        </div>
+    <div id="uploadSection" style="display: none;"> <!-- Initially hide the upload form, it will be shown when the button is clicked -->
+        <form id="uploadForm" class="card p-4 shadow-sm">
+            <!-- File input for shirt image
+            NOTE: type="file" allows users to select a file from their device
+            NOTE: The 'name' attribute must match the expected field name in the backend -->
+            <div class="mb-3">
+                <input type="file"  name="image" class="form-control" required>
+            </div>
 
-        <!-- Size inputs 
-         NOTE: type="number" creates a numeric input field
-         NOTE: The 'name' attribute must match the expected field name in the backend
-         NOTE: The 'min' attribute sets the minimum value for the input -->
-         <div class="mb-3">
-            <label for="size_s">S:</label>
-            <input id="size_s" type="number" name="size_s" class="form-control" min="0">
-         </div>
+            <!-- Text input for display name
+            NOTE: type="text" creates a single-line text input field
+            NOTE: The 'name' attribute must match the expected field name in the backend -->
+            <div class="mb-3">
+                <label for="display_name">Display Name:</label>
+                <input id="display_name" type="text" name="display_name" class="form-control" placeholder="Enter display item name">
+            </div>
 
-        <div class="mb-3">
-            <label for="size_m">M:</label>
-            <input id="size_m" type="number" name="size_m" class="form-control" min="0">
-        </div>
+            <!-- Dropdown select for shirt category
+            NOTE: The 'name' attribute must match the expected field name in the backend -->
+            <div class="mb-3">
+                <label for="category">Category:</label>
+                <select id="category" name="category" class="form-control">
+                    <option value="adult_10">Adult Shirt ($10)</option>
+                    <option value="adult_15">Adult Shirt ($15)</option>
+                    <option value="hoodie">Hoodie</option>
+                    <option value="child">Child Shirt</option>
+                </select>
+            </div>
 
-        <div class="mb-3">
-            <label for="size_l">L:</label>
-            <input id="size_l" type="number" name="size_l" class="form-control" min="0">
-        </div>
+            <!-- Size inputs 
+            NOTE: type="number" creates a numeric input field
+            NOTE: The 'name' attribute must match the expected field name in the backend
+            NOTE: The 'min' attribute sets the minimum value for the input -->
+            <div class="mb-3">
+                <label for="size_s">S:</label>
+                <input id="size_s" type="number" name="size_s" class="form-control" min="0">
+            </div>
 
-        <div class="mb-3">
-            <label for="size_xl">XL:</label>
-            <input id="size_xl" type="number" name="size_xl" class="form-control" min="0">
-        </div>
+            <div class="mb-3">
+                <label for="size_m">M:</label>
+                <input id="size_m" type="number" name="size_m" class="form-control" min="0">
+            </div>
 
-        <div class="mb-3">
-            <label for="size_xxl">XXL:</label>
-            <input id="size_xxl" type="number" name="size_xxl" class="form-control" min="0">
-        </div>
+            <div class="mb-3">
+                <label for="size_l">L:</label>
+                <input id="size_l" type="number" name="size_l" class="form-control" min="0">
+            </div>
 
-        <div class="mb-3">
-            <label for="size_xxxl">XXXL:</label>
-            <input id="size_xxxl" type="number" name="size_xxxl" class="form-control" min="0">
-        </div>
+            <div class="mb-3">
+                <label for="size_xl">XL:</label>
+                <input id="size_xl" type="number" name="size_xl" class="form-control" min="0">
+            </div>
 
-        <div class="mb-3">
-            <label for="size_6m">6M:</label>
-            <input id="size_6m" type="number" name="size_6m" class="form-control" min="0">
-        </div>
+            <div class="mb-3">
+                <label for="size_xxl">XXL:</label>
+                <input id="size_xxl" type="number" name="size_xxl" class="form-control" min="0">
+            </div>
 
-        <div class="mb-3">
-            <label for="size_12m">12M:</label>
-            <input id="size_12m" type="number" name="size_12m" class="form-control" min="0">
-        </div>
+            <div class="mb-3">
+                <label for="size_xxxl">XXXL:</label>
+                <input id="size_xxxl" type="number" name="size_xxxl" class="form-control" min="0">
+            </div>
 
-        <div class="mb-3">
-            <label for="size_24m">24M:</label>
-            <input id="size_24m" type="number" name="size_24m" class="form-control" min="0">
-        </div>
+            <div class="mb-3">
+                <label for="size_6m">6M:</label>
+                <input id="size_6m" type="number" name="size_6m" class="form-control" min="0">
+            </div>
 
-        <!-- Submit button to upload the form data to the backend -->
-        <button type="submit" class="btn btn-primary w-100">Upload</button>
-    </form>
+            <div class="mb-3">
+                <label for="size_12m">12M:</label>
+                <input id="size_12m" type="number" name="size_12m" class="form-control" min="0">
+            </div>
+
+            <div class="mb-3">
+                <label for="size_24m">24M:</label>
+                <input id="size_24m" type="number" name="size_24m" class="form-control" min="0">
+            </div>
+
+            <!-- Submit button to upload the form data to the backend -->
+            <button type="submit" class="btn btn-primary w-100">Upload</button>
+        </form>
+    </div>
 
     <hr>
 
@@ -196,6 +208,7 @@
             const container = document.getElementById("inventory");
             container.innerHTML = ""; // Clear previous content
 
+            /* Depricating table to be replaced with card layout
             const table = document.createElement("table");
             table.className = "table table-striped table-bordered table-hover"; // Add Bootstrap classes to the table for styling
             table.style.fontSize = "16px"; // Set a larger font size for better readability
@@ -347,6 +360,165 @@
 
             // Add table to page
             container.appendChild(table);
+            */
+            
+            items.forEach(item => {
+                // Create a card element for each inventory item to display the image and details in a more visually appealing way
+                const card = document.createElement("div");
+                card.className = "card p-4 mb-4 shadow-sm"; // Add Bootstrap classes to the card for styling
+
+                // Create a top row within the card to hold the image and name input side by side
+                const topRow = document.createElement("div");
+                topRow.className = "d-flex align-items-center mb-2"; // Use flexbox to align items in the top row
+
+                // Create an image element to display the shirt image, using the filename from the inventory data to construct the image URL
+                const img = document.createElement("img");
+                img.src = `/images/${item.filename}`; // Set the source of the image to the URL where the backend serves uploaded images
+                img.width = 60; // adjust size as needed
+                img.className = "img-thumbnail me-3"; // Add Bootstrap class to the image for styling and margin
+
+                topRow.appendChild(img); // Append the image element to the top row
+
+                // Create an input element for the display name, allowing the user to edit the name directly in the card
+                const nameInput = document.createElement("input");
+                nameInput.type = "text";
+                nameInput.value = item.display_name || item.filename; // Use display_name if available, otherwise fallback to filename
+                nameInput.className = "form-control"; // Add Bootstrap classes to the input for styling
+
+                topRow.appendChild(nameInput); // Append the name input to the top row, next to the image
+
+                card.appendChild(topRow); // Append the top row to the card
+
+                // Map category values to user-friendly labels for display in the card
+                const categoryLabels = {
+                    "adult_10": "Adult Shirt ($10)",
+                    "adult_15": "Adult Shirt ($15)",
+                    "hoodie": "Hoodie",
+                    "child": "Child Shirt"
+                };
+
+                // Create a div element to display the category of the shirt, using the mapped user-friendly label for better readability
+                const categoryText = document.createElement("div");
+                categoryText.className = "text-muted mb-2"; // Add Bootstrap classes for styling 
+                categoryText.innerText = categoryLabels[item.category] || item.category;
+
+                card.appendChild(categoryText); // Append the category text to the card, below the top row
+
+                // Create a container for the size inputs, using Bootstrap grid classes to create a responsive layout
+                const sizeContainer = document.createElement("div");
+                sizeContainer.className = "row g-3 mb-3"; // Use Bootstrap grid classes to create a responsive layout for the size inputs
+
+                // --- Helper function to create a size input with a label, which will be used to create inputs for each shirt size
+                function createSizeInput(label, value) {
+                    const col = document.createElement("div");
+                    col.className = "col-4"; // Each size input will take up 4 columns in the grid (3 inputs per row)
+
+                    const labelDiv = document.createElement("div");
+                    labelDiv.innerText = label; // Set the label text to indicate which size the input is for
+                    labelDiv.className = "text-center small text-muted"; // Add Bootstrap classes to style the label
+
+                    const input = document.createElement("input");
+                    input.type = "number";
+                    input.value = value ?? ""; // Use nullish coalescing operator to set empty string if value is null or undefined
+                    input.className = "form-control text-center"; // Add Bootstrap classes for styling and center the text in the input
+
+                    input.min = 0; // Set the minimum value for the input to prevent negative numbers
+
+                    // Add an event listener to the input to ensure that users cannot enter negative numbers, which would be invalid for inventory counts
+                    input.addEventListener("input", () => {
+                        if (input.value < 0) {
+                            input.value = ""; // Reset the value to an empty string if the user enters a negative number
+                        }
+                    });
+
+                    col.appendChild(labelDiv); // Append the label to the column
+                    col.appendChild(input); // Append the input to the column
+
+                    return { col, input }; // Return both the column and the input element for later use
+                }
+
+                // Create size inputs for each shirt size and append them to the size container
+                const s = createSizeInput("S", item.size_s);
+                const m = createSizeInput("M", item.size_m);
+                const l = createSizeInput("L", item.size_l);
+                const xl = createSizeInput("XL", item.size_xl);
+                const xxl = createSizeInput("XXL", item.size_xxl);
+                const xxxl = createSizeInput("XXXL", item.size_xxxl);
+
+                // Append the size input columns to the size container, which will arrange them in a grid layout
+                [sizeContainer.appendChild(s.col),
+                sizeContainer.appendChild(m.col),
+                sizeContainer.appendChild(l.col),
+                sizeContainer.appendChild(xl.col),
+                sizeContainer.appendChild(xxl.col),
+                sizeContainer.appendChild(xxxl.col)
+                ]
+
+                card.appendChild(sizeContainer); // Append the size container to the card, below the category text
+
+                // Create a container for the action buttons (Save and Delete), using flexbox to arrange them horizontally with a gap between them
+                const actionContainer = document.createElement("div");
+                actionContainer.className = "d-flex gap-2"; // Use flexbox to arrange the action buttons with a gap between them
+
+                // --- Save Button ---
+                const saveBtn = document.createElement("button");
+                saveBtn.innerText = "Save";
+                saveBtn.className = "btn btn-primary w-100"; // Add Bootstrap classes to the button for styling
+
+                // --- Delete Button ---
+                const deleteBtn = document.createElement("button");
+                deleteBtn.innerText = "Delete";
+                deleteBtn.className = "btn btn-danger w-100"; // Add Bootstrap classes to the button for styling
+
+                //--- Save Handler ---
+                saveBtn.onclick = async () => {
+                    // Send a PUT request to the backend to update the item with the new values from the input fields
+                    await fetch(`/update-item/${item.id}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        // Construct the request body with the updated values from the input fields, converting empty strings to null for backend compatibility
+                        body: JSON.stringify({
+                            display_name: nameInput.value, // Use the value from the name input for the display name
+                            
+                            size_s: s.input.value || null, // Convert empty string to null for backend compatibility
+                            size_m: m.input.value || null,
+                            size_l: l.input.value || null,
+                            size_xl: xl.input.value || null,
+                            size_xxl: xxl.input.value || null,
+                            size_xxxl: xxxl.input.value || null
+                        })
+                    });
+
+                    loadInventory(); // Refresh the inventory list after saving changes
+
+                    console.log({
+                        s: s.input.value,
+                        m: m.input.value,
+                        l: l.input.value,
+                    })
+                };
+
+                //--- Delete Handler ---
+                deleteBtn.onclick = async () => {
+                    if (!confirm("Delete this item?")) return; // Show a confirmation dialog before deleting the item
+
+                    // Send a DELETE request to the backend to delete the item with the specified ID
+                    await fetch(`/delete-item/${item.id}`, {
+                        method: "DELETE"
+                    });
+
+                    loadInventory(); // Refresh the inventory list after deleting the item
+                };
+
+                // --- Final Append ---
+                actionContainer.appendChild(saveBtn); // Append the Save button to the action container
+                actionContainer.appendChild(deleteBtn); // Append the Delete button to the action container
+
+                card.appendChild(actionContainer); // Append the action container to the card, below the size inputs
+                container.appendChild(card); // Append the card to the main inventory container on the page
+            })
         }
 
         // Add event listener to the search input field to filter inventory items as the user types
@@ -369,6 +541,18 @@
         // Automatically load inventory when the page loads
         window.onload = () => {
             loadInventory();
+        }
+        
+        // Function to toggle the visibility of the upload form when the "Upload Item" button is clicked
+        function toggleUpload() {
+            const section = document.getElementById("uploadSection");
+            section.style.display = 
+            section.style.display === "none" ? "block" : "none"; // Toggle the display of the upload section between block and none
+        }
+
+        window.onload = () => {
+            loadInventory(); // Load the inventory data from the backend when the page loads
+            document.getElementById("uploadSection").style.display = "none"; // Ensure the upload form is hidden when the page first loads
         }
     </script>
 
