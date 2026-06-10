@@ -317,6 +317,18 @@ def update_item(item_id):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
+    def safe_int(value):
+        if value == "" or value is None:
+            return None
+        
+        try:
+            num = int(value)
+            if num < 0:
+                return None
+            return num
+        except:
+            return None
+
     
     # Update the specified fields for the item with the given ID. Only updates fields that are provided in the request data.
     cursor.execute("""
@@ -325,15 +337,15 @@ def update_item(item_id):
         WHERE id = ?
     """, (
         data.get("display_name"),
-        data.get("size_s"),
-        data.get("size_m"),
-        data.get("size_l"),
-        data.get("size_xl"),
-        data.get("size_xxl"),
-        data.get("size_xxxl"),
-        data.get("size_6m"),
-        data.get("size_12m"),
-        data.get("size_24m"),
+        safe_int(data.get("size_s")),
+        safe_int(data.get("size_m")),
+        safe_int(data.get("size_l")),
+        safe_int(data.get("size_xl")),
+        safe_int(data.get("size_xxl")),
+        safe_int(data.get("size_xxxl")),
+        safe_int(data.get("size_6m")),
+        safe_int(data.get("size_12m")),
+        safe_int(data.get("size_24m")),
         last_updated,
         item_id
     ))
