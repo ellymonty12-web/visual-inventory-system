@@ -390,23 +390,27 @@
 
                     // Create a top row within the card to hold the image and name input side by side
                     const topRow = document.createElement("div");
-                    topRow.className = "d-flex align-items-center mb-2"; // Use flexbox to align items in the top row
+                    topRow.className = "d-flex align-items-stretch mb-3"; // Use flexbox to align items in the top row
 
                     // Create an image element to display the shirt image, using the filename from the inventory data to construct the image URL
                     const img = document.createElement("img");
                     img.src = `/images/${item.filename}`; // Set the source of the image to the URL where the backend serves uploaded images
-                    img.width = 60; // adjust size as needed
+                    img.width = 80; // adjust size as needed
+                    img.style.flexShrink = "0"; // Prevent the image from shrinking in height when the name input is long
                     img.className = "img-thumbnail me-3"; // Add Bootstrap class to the image for styling and margin
 
                     topRow.appendChild(img); // Append the image element to the top row
 
-                    // Create an input element for the display name, allowing the user to edit the name directly in the card
-                    const nameInput = document.createElement("input");
-                    nameInput.type = "text";
-                    nameInput.value = item.display_name || item.filename; // Use display_name if available, otherwise fallback to filename
-                    nameInput.className = "form-control"; // Add Bootstrap classes to the input for styling
+                    const nameText = document.createElement("div");
+                    nameText.innerText = item.display_name || item.filename;
+                    nameText.className = "fw-bold";
 
-                    topRow.appendChild(nameInput); // Append the name input to the top row, next to the image
+                    nameText.style.wordBreak = "break-word";
+                    nameText.style.flex = "1";
+                    nameText.style.marginLeft = "10px";
+
+                    topRow.appendChild(nameText);
+
 
                     card.appendChild(topRow); // Append the top row to the card
 
@@ -420,8 +424,8 @@
 
                     // Create a div element to display the category of the shirt, using the mapped user-friendly label for better readability
                     const categoryText = document.createElement("div");
-                    categoryText.className = "text-muted mb-2"; // Add Bootstrap classes for styling 
-                    categoryText.innerText = categoryLabels[item.category] || item.category;
+                    categoryText.className = "text-muted mb-3"; // Add Bootstrap classes for styling
+                    categoryText.innerText = (categoryLabels[item.category] || item.category || "Uncategorized"); // Display the user-friendly category label, or fallback to the raw category value if no label is defined, or "Uncategorized" if category is null or undefined
 
                     card.appendChild(categoryText); // Append the category text to the card, below the top row
 
@@ -432,20 +436,25 @@
                     // --- Helper function to create a size input with a label, which will be used to create inputs for each shirt size
                     function createSizeInput(label, value) {
                         const col = document.createElement("div");
-                        col.className = "col-4"; // Each size input will take up 4 columns in the grid (3 inputs per row)
+                        col.className = "col-4 text-center"; // Each size input will take up 4 columns in the grid (3 inputs per row)
 
                         const labelDiv = document.createElement("div");
                         labelDiv.innerText = label; // Set the label text to indicate which size the input is for
-                        labelDiv.className = "text-center small text-muted"; // Add Bootstrap classes to style the label
+                        labelDiv.className = "small text-muted"; // Add Bootstrap classes to style the label
 
                         const input = document.createElement("input");
                         input.type = "number";
                         input.value = value ?? ""; // Use nullish coalescing operator to set empty string if value is null or undefined
-                        input.className = "form-control text-center"; // Add Bootstrap classes for styling and center the text in the input
+                        input.className = "form-control text-center form-control-sm"; // Add Bootstrap classes for styling and center the text in the input
 
+                        // Set the name and id attributes for the input, which can be used to identify the field when sending data to the backend and for labeling purposes
+                        if (value === null || value === "") {
+                            input.placeholder = "-"; // Set a placeholder of "-" if the value is null or empty to indicate that there is no stock for that size, while still allowing the user to enter a value if they want to update it
+                        }
+                        
                         input.min = 0; // Set the minimum value for the input to prevent negative numbers
 
-                        // Add an event listener to the input to ensure that users cannot enter negative numbers, which would be invalid for inventory counts
+                        // Clear negative values immediately when the user types them in
                         input.addEventListener("input", () => {
                             if (input.value < 0) {
                                 input.value = ""; // Reset the value to an empty string if the user enters a negative number
@@ -479,7 +488,7 @@
 
                     // Create a container for the action buttons (Save and Delete), using flexbox to arrange them horizontally with a gap between them
                     const actionContainer = document.createElement("div");
-                    actionContainer.className = "d-flex gap-2"; // Use flexbox to arrange the action buttons with a gap between them
+                    actionContainer.className = "d-flex gap-2 mt-2"; // Use flexbox to arrange the action buttons with a gap between them
 
                     // --- Save Button ---
                     const saveBtn = document.createElement("button");
