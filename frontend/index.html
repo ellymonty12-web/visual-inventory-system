@@ -18,8 +18,8 @@
 
         <!-- Navigation buttons -->
         <div class="d-flex gap-2 mb-3">
-            <button class="btn btn-primary w-100" onclick="showInventory()">Inventory</button>
-            <button class="btn btn-secondary w-100" onclick="showUpload()">Upload</button>
+            <button id="inventoryBtn" class="btn btn-primary w-100" onclick="showInventory()">Inventory</button>
+            <button id="uploadBtn" class="btn btn-secondary w-100" onclick="showUpload()">Upload</button>
         </div>
 
         <!-- Upload form section, initially hidden and will be shown when the "Upload Item" button is clicked -->
@@ -116,7 +116,7 @@
         </div>
 
         <!-- Display response from backend -->
-        <div id="response" class="alert mt-3 d-none"></div> 
+        <div id="response" class="alert mt-3 d-none"></div>
 
         <!-- Inventory Section -->
         <div id = "inventoryView">
@@ -510,8 +510,8 @@
                             },
                             // Construct the request body with the updated values from the input fields, converting empty strings to null for backend compatibility
                             body: JSON.stringify({
-                                display_name: nameInput.value, // Use the value from the name input for the display name
-                                
+                                display_name: item.display_name || null, // Use the original display_name from the item data, or null if it's not available, since the name is not editable in this interface.
+
                                 size_s: s.input.value || null, // Convert empty string to null for backend compatibility
                                 size_m: m.input.value || null,
                                 size_l: l.input.value || null,
@@ -588,6 +588,18 @@
             // --- View Switching Functions ---
             // Functions to switch between inventory view and upload form view when the respective buttons are clicked
             function showInventory() {
+                const inventoryBtn = document.getElementById("inventoryBtn");
+                const uploadBtn = document.getElementById("uploadBtn");
+
+                // Ensure that the buttons exist before trying to modify their classes to prevent potential errors if the elements are not found
+                if (inventoryBtn && uploadBtn) {
+                    inventoryBtn.classList.add("btn-primary");
+                    inventoryBtn.classList.remove("btn-secondary");
+
+                    uploadBtn.classList.add("btn-secondary");
+                    uploadBtn.classList.remove("btn-primary");
+                }
+
                 document.getElementById("inventoryView").style.display = "block"; // Show the inventory section
                 document.getElementById("uploadView").style.display = "none"; // Hide the upload form section
 
@@ -600,8 +612,22 @@
 
             // Function to show the upload form and hide the inventory section when the "Upload" button is clicked
             function showUpload() {
+                const inventoryBtn = document.getElementById("inventoryBtn");
+                const uploadBtn = document.getElementById("uploadBtn");
+
+                // Ensure that the buttons exist before trying to modify their classes to prevent potential errors if the elements are not found
+                if (inventoryBtn && uploadBtn) {
+                    inventoryBtn.classList.add("btn-primary");
+                    inventoryBtn.classList.remove("btn-secondary");
+
+                    uploadBtn.classList.add("btn-secondary");
+                    uploadBtn.classList.remove("btn-primary");
+                }
+
                 document.getElementById("inventoryView").style.display = "none"; // Hide the inventory section
                 document.getElementById("uploadView").style.display = "block"; // Show the upload form section
+
+                document.getElementById("uploadForm").reset(); // Reset the upload form to clear any previous input values when switching to the upload view
 
                 document.getElementById("uploadBtn").classList.add("btn-primary"); // Highlight the upload button to indicate it's active
                 document.getElementById("uploadBtn").classList.remove("btn-secondary"); // Remove the secondary styling from the upload button
