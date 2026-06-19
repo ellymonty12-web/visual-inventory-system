@@ -490,45 +490,16 @@
                     const actionContainer = document.createElement("div");
                     actionContainer.className = "d-flex gap-2 mt-2"; // Use flexbox to arrange the action buttons with a gap between them
 
-                    // --- Save Button ---
-                    const saveBtn = document.createElement("button");
-                    saveBtn.innerText = "Save";
-                    saveBtn.className = "btn btn-primary w-100"; // Add Bootstrap classes to the button for styling
+                    const editBtn = document.createElement("button");
+                    editBtn.innerText = "Edit";
+                    editBtn.className = "btn btn-secondary w-100"; // Add Bootstrap classes to the button for styling
+
+                    editBtn.onclick = () => showEdit(item); // Call the function to show the edit form when the Edit button is clicked
 
                     // --- Delete Button ---
                     const deleteBtn = document.createElement("button");
                     deleteBtn.innerText = "Delete";
                     deleteBtn.className = "btn btn-danger w-100"; // Add Bootstrap classes to the button for styling
-
-                    //--- Save Handler ---
-                    saveBtn.onclick = async () => {
-                        // Send a PUT request to the backend to update the item with the new values from the input fields
-                        await fetch(`/update-item/${item.id}`, {
-                            method: "PUT",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            // Construct the request body with the updated values from the input fields, converting empty strings to null for backend compatibility
-                            body: JSON.stringify({
-                                display_name: item.display_name || null, // Use the original display_name from the item data, or null if it's not available, since the name is not editable in this interface.
-
-                                size_s: s.input.value || null, // Convert empty string to null for backend compatibility
-                                size_m: m.input.value || null,
-                                size_l: l.input.value || null,
-                                size_xl: xl.input.value || null,
-                                size_xxl: xxl.input.value || null,
-                                size_xxxl: xxxl.input.value || null
-                            })
-                        });
-
-                        loadInventory(); // Refresh the inventory list after saving changes
-
-                        console.log({
-                            s: s.input.value,
-                            m: m.input.value,
-                            l: l.input.value,
-                        })
-                    };
 
                     //--- Delete Handler ---
                     deleteBtn.onclick = async () => {
@@ -543,7 +514,7 @@
                     };
 
                     // --- Final Append ---
-                    actionContainer.appendChild(saveBtn); // Append the Save button to the action container
+                    actionContainer.appendChild(editBtn); // Append the Edit button to the action container
                     actionContainer.appendChild(deleteBtn); // Append the Delete button to the action container
 
                     card.appendChild(actionContainer); // Append the action container to the card, below the size inputs
