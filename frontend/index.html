@@ -53,7 +53,7 @@
                     <select id="category" name="category" class="form-control">
                         <option value="adult_10">Adult Shirt ($10)</option>
                         <option value="adult_15">Adult Shirt ($15)</option>
-                        <option value="hoodie">Hoodie</option>
+                        <option value="adult_hoodie">Hoodie</option>
                         <option value="child">Child Shirt</option>
                     </select>
                 </div>
@@ -159,7 +159,7 @@
                     <select id="edit_category" class="form-control">
                         <option value="adult_10">Adult Shirt ($10)</option>
                         <option value="adult_15">Adult Shirt ($15)</option>
-                        <option value="hoodie">Hoodie</option>
+                        <option value="adult_hoodie">Hoodie</option>
                         <option value="child">Child Shirt</option>
                     </select>
                 </div>
@@ -174,6 +174,9 @@
                     <div class="col-4"><input id="edit_xxxl" type="number" class="form-control" placeholder="XXXL"></div>
                 </div>
 
+                <!-- Save button to submit the edited item data to the backend -->
+                <button type="submit" class="btn btn-primary w-100 mt-3">Save Changes</button>
+                
                 <!-- Cancel button to switch back to the inventory view without saving changes -->
                 <button type="button" class="btn btn-secondary w-100 mt-3" onclick="showInventory()">Cancel</button>
 
@@ -460,7 +463,7 @@
                     const categoryLabels = {
                         "adult_10": "Adult Shirt ($10)",
                         "adult_15": "Adult Shirt ($15)",
-                        "hoodie": "Hoodie",
+                        "adult_hoodie": "Hoodie",
                         "child": "Child Shirt"
                     };
 
@@ -621,6 +624,8 @@
 
                 document.getElementById("uploadBtn").classList.add("btn-secondary"); // Set the upload button to secondary styling to indicate it's inactive
                 document.getElementById("uploadBtn").classList.remove("btn-primary"); // Remove the primary styling from the upload button
+
+                document.getElementById("editView").style.display = "none"; // Hide the edit form section when switching back to the inventory view
             }
 
             // Function to show the upload form and hide the inventory section when the "Upload" button is clicked
@@ -647,6 +652,8 @@
                 
                 document.getElementById("inventoryBtn").classList.add("btn-secondary"); // Set the inventory button to secondary styling to indicate it's inactive
                 document.getElementById("inventoryBtn").classList.remove("btn-primary"); // Remove the primary styling from the inventory button
+            
+                document.getElementById("editView").style.display = "none"; // Hide the edit form section when switching to the upload view
             }
 
             // Function to show the edit form and hide the inventory and upload sections when the "Edit" button is clicked for an inventory item, and pre-fill the form with the existing item data
@@ -677,6 +684,35 @@
                 document.getElementById("edit_xxl").placeholder = "XXL";
                 document.getElementById("edit_xxxl").placeholder = "XXXL";
             }
+
+            document.getElementById("editForm").addEventListener("submit", async (e) => {
+                e.preventDefault(); // Prevent the default form submission behavior, which would cause a page reload
+
+                const id = document.getElementById("edit_id").value; // Get the ID of the item being edited from the hidden input field
+
+                await fetch(`/update-item/${id}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        display_name: document.getElementById("edit_name").value, // Get the updated display name from the form input
+                        category: document.getElementById("edit_category").value, // Get the updated category from the form select input
+
+                        size_s: document.getElementById("edit_s").value || null, // Get the updated size S value from the form input, using null if the input is empty
+                        size_m: document.getElementById("edit_m").value || null, // Get the updated size M value from the form input, using null if the input is empty
+                        size_l: document.getElementById("edit_l").value || null, // Get the updated size L value from the form input, using null if the input is empty
+                        size_xl: document.getElementById("edit_xl").value || null,
+                        size_xxl: document.getElementById("edit_xxl").value || null, // Get the updated size XXL value from the form input, using null if the input is empty
+                        size_xxxl: document.getElementById("edit_xxxl").value || null // Get the updated size XXXL value from the form input, using null if the input is empty
+                    })
+                });
+
+                loadInventory(); // Refresh the inventory list after saving the changes to the item
+                showInventory(); // Switch back to the inventory view to show the updated inventory list after saving the changes to the item
+            
+                document.getElementById("editForm").reset(); // Reset the edit form to clear the input fields after saving the changes
+            });
 
         </script>
 
