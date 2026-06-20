@@ -166,12 +166,30 @@
 
                 <!-- Size inputs for editing shirt sizes, pre-filled with the existing size data when editing an item -->
                 <div class="row g-2">
-                    <div class="col-4"><input id="edit_s" type="number" class="form-control" placeholder="S"></div>
-                    <div class="col-4"><input id="edit_m" type="number" class="form-control" placeholder="M"></div>
-                    <div class="col-4"><input id="edit_l" type="number" class="form-control" placeholder="L"></div>
-                    <div class="col-4"><input id="edit_xl" type="number" class="form-control" placeholder="XL"></div>
-                    <div class="col-4"><input id="edit_xxl" type="number" class="form-control" placeholder="XXL"></div>
-                    <div class="col-4"><input id="edit_xxxl" type="number" class="form-control" placeholder="XXXL"></div>
+                    <div class="col-4 text-center">
+                        <div class="small text-muted">S</div>
+                        <input id="edit_s" type="number" class="form-control text-center">
+                    </div>
+                    <div class="col-4 text-center">
+                        <div class="small text-muted">M</div>
+                        <input id="edit_m" type="number" class="form-control text-center">
+                    </div>
+                    <div class="col-4 text-center">
+                        <div class="small text-muted">L</div>
+                        <input id="edit_l" type="number" class="form-control text-center">
+                    </div>
+                    <div class="col-4 text-center">
+                        <div class="small text-muted">XL</div>
+                        <input id="edit_xl" type="number" class="form-control text-center">
+                    </div>
+                    <div class="col-4 text-center">
+                        <div class="small text-muted">XXL</div>
+                        <input id="edit_xxl" type="number" class="form-control text-center">
+                    </div>
+                    <div class="col-4 text-center">
+                        <div class="small text-muted">XXXL</div>
+                        <input id="edit_xxxl" type="number" class="form-control text-center">
+                    </div>
                 </div>
 
                 <!-- Save button to submit the edited item data to the backend -->
@@ -478,56 +496,34 @@
                     const sizeContainer = document.createElement("div");
                     sizeContainer.className = "row g-3 mb-3"; // Use Bootstrap grid classes to create a responsive layout for the size inputs
 
-                    // --- Helper function to create a size input with a label, which will be used to create inputs for each shirt size
-                    function createSizeInput(label, value) {
+                    // --- Helper function to create a size input column ---
+                    function createSizeDisplay(label, value) {
                         const col = document.createElement("div");
-                        col.className = "col-4 text-center"; // Each size input will take up 4 columns in the grid (3 inputs per row)
+                        col.className = "col-4 text-center"; // Use Bootstrap grid classes to create a column for the size input and center the content
 
                         const labelDiv = document.createElement("div");
-                        labelDiv.innerText = label; // Set the label text to indicate which size the input is for
-                        labelDiv.className = "small text-muted"; // Add Bootstrap classes to style the label
+                        labelDiv.innerText = label; // Set the text of the label to the size label (e.g. "S", "M", etc.)
+                        labelDiv.className = "small text-muted"; // Add Bootstrap classes to the label for styling
 
-                        const input = document.createElement("input");
-                        input.type = "number";
-                        input.value = value ?? ""; // Use nullish coalescing operator to set empty string if value is null or undefined
-                        input.className = "form-control text-center form-control-sm"; // Add Bootstrap classes for styling and center the text in the input
+                        const valueDiv = document.createElement("div");
+                        valueDiv.className = "form-control text-center"; // Add Bootstrap classes to the value div for styling
 
-                        // Set the name and id attributes for the input, which can be used to identify the field when sending data to the backend and for labeling purposes
-                        if (value === null || value === "") {
-                            input.placeholder = "-"; // Set a placeholder of "-" if the value is null or empty to indicate that there is no stock for that size, while still allowing the user to enter a value if they want to update it
-                        }
-                        
-                        input.min = 0; // Set the minimum value for the input to prevent negative numbers
+                        valueDiv.innerText = value ?? "-"; // Display the size value, or a dash if the value is null or undefined
 
-                        // Clear negative values immediately when the user types them in
-                        input.addEventListener("input", () => {
-                            if (input.value < 0) {
-                                input.value = ""; // Reset the value to an empty string if the user enters a negative number
-                            }
-                        });
+                        valueDiv.style.backgroundColor = "#f8f9fa"; // Set a light background color for the value div to make it look like an input field
 
-                        col.appendChild(labelDiv); // Append the label to the column
-                        col.appendChild(input); // Append the input to the column
+                        col.appendChild(labelDiv); // Append the label div to the column
+                        col.appendChild(valueDiv); // Append the value div to the column
 
-                        return { col, input }; // Return both the column and the input element for later use
+                        return col; // Return the column element containing the size label and value, which can be appended to the size container in the card
                     }
 
-                    // Create size inputs for each shirt size and append them to the size container
-                    const s = createSizeInput("S", item.size_s);
-                    const m = createSizeInput("M", item.size_m);
-                    const l = createSizeInput("L", item.size_l);
-                    const xl = createSizeInput("XL", item.size_xl);
-                    const xxl = createSizeInput("XXL", item.size_xxl);
-                    const xxxl = createSizeInput("XXXL", item.size_xxxl);
-
-                    // Append the size input columns to the size container, which will arrange them in a grid layout
-                    [sizeContainer.appendChild(s.col),
-                    sizeContainer.appendChild(m.col),
-                    sizeContainer.appendChild(l.col),
-                    sizeContainer.appendChild(xl.col),
-                    sizeContainer.appendChild(xxl.col),
-                    sizeContainer.appendChild(xxxl.col)
-                    ]
+                    sizeContainer.appendChild(createSizeDisplay("S", item.size_s));
+                    sizeContainer.appendChild(createSizeDisplay("M", item.size_m));
+                    sizeContainer.appendChild(createSizeDisplay("L", item.size_l));
+                    sizeContainer.appendChild(createSizeDisplay("XL", item.size_xl));
+                    sizeContainer.appendChild(createSizeDisplay("XXL", item.size_xxl));
+                    sizeContainer.appendChild(createSizeDisplay("XXXL", item.size_xxxl));
 
                     card.appendChild(sizeContainer); // Append the size container to the card, below the category text
 
@@ -677,12 +673,12 @@
                 document.getElementById("edit_xxxl").value = item.size_xxxl ?? "";
 
                 // Set placeholders for size inputs to indicate the size labels, which will be visible when the input is empty
-                document.getElementById("edit_s").placeholder = "S";
-                document.getElementById("edit_m").placeholder = "M";
-                document.getElementById("edit_l").placeholder = "L";
-                document.getElementById("edit_xl").placeholder = "XL";
-                document.getElementById("edit_xxl").placeholder = "XXL";
-                document.getElementById("edit_xxxl").placeholder = "XXXL";
+                document.getElementById("edit_s").placeholder = "-";
+                document.getElementById("edit_m").placeholder = "-";
+                document.getElementById("edit_l").placeholder = "-";
+                document.getElementById("edit_xl").placeholder = "-";
+                document.getElementById("edit_xxl").placeholder = "-";
+                document.getElementById("edit_xxxl").placeholder = "-";
             }
 
             document.getElementById("editForm").addEventListener("submit", async (e) => {
