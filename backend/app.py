@@ -328,15 +328,30 @@ def update_item(item_id):
             return num
         except:
             return None
+        
+    category = data.get("category")
 
-    
+    if category == "adult_10":
+        price = 10
+    elif category == "adult_15":
+        price = 15
+    elif category == "adult_hoodie":
+        price = 30
+    elif category == "child":
+        price = 10
+    else:
+        price = 10 # Default price if category is unrecognized
+
     # Update the specified fields for the item with the given ID. Only updates fields that are provided in the request data.
     cursor.execute("""
         UPDATE shirts
-        SET display_name = ?, size_s = ?, size_m = ?, size_l = ?, size_xl = ?, size_xxl = ?, size_xxxl = ?, size_6m = ?, size_12m = ?, size_24m = ?, last_updated = ?
+        SET display_name = ?, category = ?, price = ?, size_s = ?, size_m = ?, size_l = ?, size_xl = ?, size_xxl = ?, size_xxxl = ?, size_6m = ?, size_12m = ?, size_24m = ?, last_updated = ?
         WHERE id = ?
     """, (
         data.get("display_name"),
+        category,
+        price,
+
         safe_int(data.get("size_s")),
         safe_int(data.get("size_m")),
         safe_int(data.get("size_l")),
@@ -346,6 +361,7 @@ def update_item(item_id):
         safe_int(data.get("size_6m")),
         safe_int(data.get("size_12m")),
         safe_int(data.get("size_24m")),
+        
         last_updated,
         item_id
     ))
