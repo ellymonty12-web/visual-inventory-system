@@ -164,8 +164,24 @@
                     </select>
                 </div>
 
-                <!-- Size inputs for editing shirt sizes, pre-filled with the existing size data when editing an item -->
+                <div id="childSizes" class="row g-2">
+                    <!-- 6M, 12M, 24M -->
+                    <div class="col-4 text-center">
+                        <div class="small text-muted">6M</div>
+                        <input id="edit_6m" type="number" class="form-control text-center">
+                    </div>
+                    <div class="col-4 text-center">
+                        <div class="small text-muted">12M</div>
+                        <input id="edit_12m" type="number" class="form-control text-center">
+                    </div>
+                    <div class="col-4 text-center">
+                        <div class="small text-muted">24M</div>
+                        <input id="edit_24m" type="number" class="form-control text-center">
+                    </div>
+                </div>
+
                 <div class="row g-2">
+                    <!-- Shared sizes-->
                     <div class="col-4 text-center">
                         <div class="small text-muted">S</div>
                         <input id="edit_s" type="number" class="form-control text-center">
@@ -182,6 +198,11 @@
                         <div class="small text-muted">XL</div>
                         <input id="edit_xl" type="number" class="form-control text-center">
                     </div>
+                </div>
+
+                <!-- Size inputs for editing shirt sizes, pre-filled with the existing size data when editing an item -->
+                <div id="adultSizes" class="row g-2">
+                    <!-- S, M, L, XL, XXL, XXXL -->
                     <div class="col-4 text-center">
                         <div class="small text-muted">XXL</div>
                         <input id="edit_xxl" type="number" class="form-control text-center">
@@ -492,10 +513,6 @@
 
                     card.appendChild(categoryText); // Append the category text to the card, below the top row
 
-                    // Create a container for the size inputs, using Bootstrap grid classes to create a responsive layout
-                    const sizeContainer = document.createElement("div");
-                    sizeContainer.className = "row g-3 mb-3"; // Use Bootstrap grid classes to create a responsive layout for the size inputs
-
                     // --- Helper function to create a size input column ---
                     function createSizeDisplay(label, value) {
                         const col = document.createElement("div");
@@ -518,14 +535,35 @@
                         return col; // Return the column element containing the size label and value, which can be appended to the size container in the card
                     }
 
-                    sizeContainer.appendChild(createSizeDisplay("S", item.size_s));
-                    sizeContainer.appendChild(createSizeDisplay("M", item.size_m));
-                    sizeContainer.appendChild(createSizeDisplay("L", item.size_l));
-                    sizeContainer.appendChild(createSizeDisplay("XL", item.size_xl));
-                    sizeContainer.appendChild(createSizeDisplay("XXL", item.size_xxl));
-                    sizeContainer.appendChild(createSizeDisplay("XXXL", item.size_xxxl));
+                    const isChild = item.category === "child"; // Check if the item is a child shirt based on its category
+
+                    // Create a container for the size inputs, using Bootstrap grid classes to create a responsive layout
+                    const sizeContainer = document.createElement("div");
+                    sizeContainer.className = "row g-3 mb-3"; // Use Bootstrap grid classes to create a responsive layout for the size inputs
+
+                    function addSize(label, value) {
+                        sizeContainer.appendChild(createSizeDisplay(label, value)); // Append the size display to the size container
+                    }
+
+                    if (isChild) {
+                        addSize("6M", item.size_6m);
+                        addSize("12M", item.size_12m);
+                        addSize("24M", item.size_24m);
+                        addSize("S", item.size_s);
+                        addSize("M", item.size_m);
+                        addSize("L", item.size_l);
+                        addSize("XL", item.size_xl);
+                    } else {
+                        addSize("S", item.size_s);
+                        addSize("M", item.size_m);
+                        addSize("L", item.size_l);
+                        addSize("XL", item.size_xl);
+                        addSize("XXL", item.size_xxl);
+                        addSize("XXXL", item.size_xxxl);
+                    }
 
                     card.appendChild(sizeContainer); // Append the size container to the card, below the category text
+
 
                     // Create a container for the action buttons (Save and Delete), using flexbox to arrange them horizontally with a gap between them
                     const actionContainer = document.createElement("div");
@@ -671,6 +709,9 @@
                 document.getElementById("edit_xl").value = item.size_xl ?? "";
                 document.getElementById("edit_xxl").value = item.size_xxl ?? "";
                 document.getElementById("edit_xxxl").value = item.size_xxxl ?? "";
+                document.getElementById("edit_6m").value = item.size_6m ?? "";
+                document.getElementById("edit_12m").value = item.size_12m ?? "";
+                document.getElementById("edit_24m").value = item.size_24m ?? "";
 
                 // Set placeholders for size inputs to indicate the size labels, which will be visible when the input is empty
                 document.getElementById("edit_s").placeholder = "-";
@@ -679,6 +720,21 @@
                 document.getElementById("edit_xl").placeholder = "-";
                 document.getElementById("edit_xxl").placeholder = "-";
                 document.getElementById("edit_xxxl").placeholder = "-";
+                document.getElementById("edit_6m").placeholder = "-";
+                document.getElementById("edit_12m").placeholder = "-";
+                document.getElementById("edit_24m").placeholder = "-";
+
+                const isChild = item.category === "child"; // Check if the item is a child shirt based on its category
+
+                document.getElementById("adultSizes").style.display = isChild ? "none" : "flex"; // Show adult sizes if the item is not a child shirt
+                document.getElementById("childSizes").style.display = isChild ? "flex" : "none"; // Show child sizes if the item is a child shirt
+
+                document.getElementById("edit_category").addEventListener("change", (e) => {
+                    const isChild = e.target.value === "child"; // Check if the selected category is "child" when the category select input changes
+
+                    document.getElementById("adultSizes").style.display = isChild ? "none" : "flex"; // Show adult sizes if the selected category is not "child"
+                    document.getElementById("childSizes").style.display = isChild ? "flex" : "none"; // Show child sizes if the selected category is "child"
+                });
             }
 
             document.getElementById("editForm").addEventListener("submit", async (e) => {
@@ -700,7 +756,10 @@
                         size_l: document.getElementById("edit_l").value || null, // Get the updated size L value from the form input, using null if the input is empty
                         size_xl: document.getElementById("edit_xl").value || null,
                         size_xxl: document.getElementById("edit_xxl").value || null, // Get the updated size XXL value from the form input, using null if the input is empty
-                        size_xxxl: document.getElementById("edit_xxxl").value || null // Get the updated size XXXL value from the form input, using null if the input is empty
+                        size_xxxl: document.getElementById("edit_xxxl").value || null, // Get the updated size XXXL value from the form input, using null if the input is empty
+                        size_6m: document.getElementById("edit_6m").value || null,
+                        size_12m: document.getElementById("edit_12m").value || null,
+                        size_24m: document.getElementById("edit_24m").value || null
                     })
                 });
 
